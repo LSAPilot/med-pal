@@ -18,6 +18,11 @@ regulatory-helper = "regulatory_helper.cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8"]
+# UI only: the Space gets gradio through its `sdk_version`, so this group is not exported to requirements.txt
+app = ["gradio==6.31.0"]
+
+[tool.uv]
+default-groups = ["dev", "app"]
 
 [build-system]
 requires = ["uv_build>=0.13.7,<0.14.0"]
