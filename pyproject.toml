@@ -2,6 +2,8 @@
 name = "regulatory-helper"
 version = "0.1.0"
 description = "RAG system for regulatory questions about medical device software (MDR, GDPR, AI Act)"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
     "anthropic>=2.8.0",
