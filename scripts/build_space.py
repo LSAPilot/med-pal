@@ -30,7 +30,10 @@ from regulatory_helper.service import load_examples  # noqa: E402
 DEFAULT_SPACE = Path("/home/lorenz/medical-app-regulatory-helper")
 INDEX_FILES = ["chunks.jsonl", "embeddings.npy", "ids.json", "bm25.json", "index_meta.json"]
 FORBIDDEN = ["data/raw", "tests", "scripts", "docs", ".env", ".venv", "uv.lock", "pyproject.toml"]
-TORCH_INDEX = "--extra-index-url https://download.pytorch.org/whl/cpu"
+# ZeroGPU only accepts specific torch versions in the Space's requirements.txt (list shown in the build error, as of 2026-11-12:
+# 2.13.0, 2.12.1, 2.11.0, 2.10.0, 2.9.1, 2.8.0). Locally torch stays the CPU build from uv.lock; for the Space it is replaced by this pin.
+# Change here if Hugging Face changes the list. Must satisfy sentence-transformers (torch>=2.2) and transformers (torch>=2.6).
+SPACE_TORCH_VERSION = "2.13.0"
 SPACE_GITIGNORE = "__pycache__/\n*.pyc\n.env\n.env.*\n"
 
 
@@ -39,14 +42,23 @@ def die(msg: str) -> None:
 
 
 def export_requirements() -> str:
-    """requirements.txt for the Space via `uv export`. Gradio itself is left out (the Space installs it from `sdk_version`)."""
+    """requirements.txt for the Space via `uv export`. Gradio itself is left out (the Space installs it from `sdk_version`).
+
+    uv.lock pins the local CPU build of torch (`+cpu` plus an extra index). ZeroGPU rejects that, so all torch lines
+    and index lines are removed and the plain version SPACE_TORCH_VERSION is pinned instead.
+    """
     out = subprocess.run(
         ["uv", "export", "--no-dev", "--no-group", "app", "--no-hashes", "--no-emit-project", "--no-annotate"],
         cwd=ROOT, check=True, capture_output=True, text=True,
     ).stdout
     if re.search(r"^gradio(-client)?==", out, re.M):
         die("gradio is in the exported requirements; keep it out (sdk_version provides it)")
-    return TORCH_INDEX + "\n" + out  # the +cpu wheel of torch lives on this extra index
+    return space_requirements(out)
+
+
+def space_requirements(exported: str) -> str:
+    lines = [ln for ln in exported.splitlines() if not re.match(r"^(torch==|--(extra-)?index-url\b)", ln)]
+    return "\n".join(lines).rstrip("\n") + f"\ntorch=={SPACE_TORCH_VERSION}\n"
 
 
 def pinned_gradio() -> str:

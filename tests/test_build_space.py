@@ -30,10 +30,29 @@ def test_sdk_version_mismatch_is_refused():
         bs.space_readme(HEAD.replace("6.31.0", "5.0.0"))
 
 
-def test_requirements_exclude_gradio_and_use_cpu_torch_index():
+def test_space_requirements_pin_supported_torch_and_drop_cpu_index():
     reqs = bs.export_requirements()
-    assert reqs.startswith("--extra-index-url https://download.pytorch.org/whl/cpu")
-    assert "gradio" not in reqs and "nvidia" not in reqs and "torch==" in reqs
+    lines = reqs.splitlines()
+    assert [ln for ln in lines if ln.startswith("torch")] == [f"torch=={bs.SPACE_TORCH_VERSION}"]
+    assert "+cpu" not in reqs and "index-url" not in reqs
+    assert "gradio" not in reqs and "nvidia" not in reqs
+    assert any(ln.startswith("sentence-transformers==") for ln in lines)
+    assert reqs.endswith("\n") and not reqs.endswith("\n\n")
+
+
+def test_space_requirements_replace_all_torch_lines():
+    exported = (
+        "--extra-index-url https://download.pytorch.org/whl/cpu\nnumpy==2.5.4\n"
+        "torch==2.14.1 ; sys_platform == 'darwin'\ntorch==2.15.0+cpu ; sys_platform != 'darwin'\ntorchvision==0.1\n"
+    )
+    out = bs.space_requirements(exported)
+    assert out == f"numpy==2.5.4\ntorchvision==0.1\ntorch=={bs.SPACE_TORCH_VERSION}\n"
+
+
+def test_pinned_torch_is_compatible_with_dependency_constraints():
+    from packaging.version import Version
+
+    assert Version(bs.SPACE_TORCH_VERSION) >= Version("2.6")  # transformers needs torch>=2.6, sentence-transformers >=2.2
 
 
 def test_dry_run_into_fake_space_writes_nothing(tmp_path):
