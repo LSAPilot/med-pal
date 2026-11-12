@@ -1,4 +1,4 @@
-"""Command line interface: fetch, ingest, index, search, ask, chat."""
+"""Command line interface: fetch, ingest, index, search, ask, chat, serve."""
 from __future__ import annotations
 
 import argparse
@@ -16,6 +16,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("query")
     sp.add_argument("--mode", choices=["bm25", "vector", "hybrid"], default="hybrid")
     sp.add_argument("--k", type=int, default=6)
+    sub.add_parser("serve", help="start the Gradio app locally")
     sub.add_parser("ingest", help="split data/raw/*.xhtml into data/processed/chunks.jsonl")
     for name, h in (("ask", "answer one question (calls the Claude API)"), ("chat", "interactive session with follow-up questions")):
         ap = sub.add_parser(name, help=h)
@@ -46,6 +47,10 @@ def main(argv: list[str] | None = None) -> None:
             print(f"{h.rank}. {h.chunk.id}  score={h.score:.4f}{cos}\n   {h.chunk.citation} | {h.chunk.title[:90]}\n   {first[:160]}")
     elif args.command in ("ask", "chat"):
         _ask_or_chat(args)
+    elif args.command == "serve":
+        from .app import launch
+
+        launch()
     elif args.command == "ingest":
         chunks = chunking.ingest()
         print(f"wrote {len(chunks)} chunks to {chunking.OUT_PATH}")
