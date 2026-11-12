@@ -17,7 +17,10 @@ dependencies = [
 regulatory-helper = "regulatory_helper.cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "matplotlib>=3.10.9",
+    "pytest>=8",
+]
 # UI only: the Space gets gradio through its `sdk_version`, so this group is not exported to requirements.txt
 app = ["gradio==6.31.0"]
 
