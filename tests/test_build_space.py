@@ -85,7 +85,7 @@ def test_sync_copies_only_allowed_files(tmp_path):
                        capture_output=True, text=True, cwd=ROOT)
     assert r.returncode == 0, r.stderr
     top = {p.name for p in tmp_path.iterdir()}
-    assert top == {".git", "README.md", "app.py", "src", "data", "requirements.txt", ".gitignore"}
+    assert top == {".git", "README.md", "LICENSE", "app.py", "src", "data", "requirements.txt", ".gitignore"}
     assert {p.name for p in (tmp_path / "data").iterdir()} == {"processed", "examples.json"}
     assert (tmp_path / "README.md").read_text().startswith(HEAD)
 

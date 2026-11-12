@@ -6,7 +6,7 @@
 Development happens only in this repo. This script fills the Space clone; it never runs git there
 (commit and push are done by hand after review, see docs/deployment.md).
 
-What goes in:        app.py, src/regulatory_helper/*.py, requirements.txt (resolved with uv pip compile), data/processed/{index files}, data/examples.json,
+What goes in:        app.py, LICENSE, src/regulatory_helper/*.py, requirements.txt (resolved with uv pip compile), data/processed/{index files}, data/examples.json,
                      README.md (YAML header of the Space is kept untouched, only the text below it is replaced)
 What stays out:      data/raw/, tests/, scripts/, docs/, .env, .venv, caches
 Safety checks:       requirements resolve together with the Hugging Face packages, index hash matches chunks.jsonl, example sources match chunks.jsonl, Space README header is intact
@@ -193,6 +193,7 @@ def copy_tree(space: Path, dry: bool) -> list[str]:
             shutil.copy2(src, dst)
 
     put(ROOT / "app.py", "app.py")
+    put(ROOT / "LICENSE", "LICENSE")  # the Space README links to it
     pkg = sorted(p for p in (ROOT / "src" / "regulatory_helper").glob("*.py"))
     pkg_dst = space / "src" / "regulatory_helper"
     if pkg_dst.exists() and not dry:  # mirror: drop modules that no longer exist in the source
