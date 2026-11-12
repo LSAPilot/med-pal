@@ -1,0 +1,829 @@
+[
+ {
+  "id": "lab-values",
+  "question": {
+   "de": "Muss meine Software, die Laborwerte nur anzeigt, nach MDR als Medizinprodukt eingestuft werden?",
+   "en": "Does my software that only displays laboratory values have to be qualified as a medical device under the MDR?"
+  },
+  "replies": {
+   "de": {
+    "text": "Die Passagen klären nur die Klassifizierung, nicht, ob Ihre Software überhaupt ein Medizinprodukt ist. Die dafür nötige Definition fehlt. Ist sie ein Medizinprodukt, ist sie nach Anhang VIII Ziff. 3.3 eigenständig zu klassifizieren, wenn sie unabhängig von anderen Geräten ist. Reine Anzeige ohne Informationen, die für diagnostische oder therapeutische Entscheidungen genutzt werden, fällt nach Regel 11 (Ziff. 6.3) unter 'alle übrige Software' und damit in Klasse I. Wird die angezeigte Information dagegen für solche Entscheidungen verwendet, gilt Klasse IIa, bei möglicher schwerer Verschlechterung oder chirurgischem Eingriff IIb und bei möglichem Tod oder irreversibler Verschlechterung Klasse III. Welche Einstufung zutrifft, hängt von der Zweckbestimmung ab, die die Passagen nicht beschreiben.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "MDR-ANNEX-VIII-6.3",
+      "title": "Annex VIII: CLASSIFICATION RULES > CHAPTER III - CLASSIFICATION RULES > 6. ACTIVE DEVICES > 6.3. Rule 11",
+      "citation": "MDR Annex VIII, point 6.3 (Rule 11)",
+      "quote": "Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause:\n— death or an irreversible deterioration of a person's state of health, in which case it is in class III; or\n— a serious deterioration of a person's state of health or a surgical intervention, in which case it is classified as class IIb.\nSoftware intended to monitor physiological processes is classified as class IIa, except if it is intended for monitoring of vital physiological parameters, where the nature of variations of those parameters is such that it could result in immediate danger to the patient, in which case it is classified as class IIb.\nAll other software is classified as class I.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#anx_VIII"
+     },
+     {
+      "id": "MDR-ANNEX-VIII-3.3",
+      "title": "Annex VIII: CLASSIFICATION RULES > CHAPTER II - IMPLEMENTING RULES",
+      "citation": "MDR Annex VIII, point 3.3",
+      "quote": "Software, which drives a device or influences the use of a device, shall fall within the same class as the device.\nIf the software is independent of any other device, it shall be classified in its own right.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#anx_VIII"
+     }
+    ],
+    "search_query": "medical device software qualification displaying laboratory results only, classification rule Annex VIII Rule 11, MDR 2017/745 Article 2(1)",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "MDR-ANNEX-VIII-6.3",
+      "citation": "MDR Annex VIII, point 6.3 (Rule 11)",
+      "score": 0.0313,
+      "cosine": 0.779
+     },
+     {
+      "rank": 2,
+      "id": "MDR-ANNEX-VIII-7.4",
+      "citation": "MDR Annex VIII, point 7.4 (Rule 17)",
+      "score": 0.0303,
+      "cosine": 0.785
+     },
+     {
+      "rank": 3,
+      "id": "MDR-ANNEX-VIII-7.9",
+      "citation": "MDR Annex VIII, point 7.9 (Rule 22)",
+      "score": 0.0296,
+      "cosine": 0.772
+     },
+     {
+      "rank": 4,
+      "id": "MDR-ANNEX-VIII-4.1",
+      "citation": "MDR Annex VIII, point 4.1 (Rule 1)",
+      "score": 0.0293,
+      "cosine": 0.763
+     },
+     {
+      "rank": 5,
+      "id": "MDR-ANNEX-VIII-3.3",
+      "citation": "MDR Annex VIII, point 3.3",
+      "score": 0.029,
+      "cosine": 0.786
+     },
+     {
+      "rank": 6,
+      "id": "MDR-ANNEX-VIII-3.2",
+      "citation": "MDR Annex VIII, point 3.2",
+      "score": 0.0289,
+      "cosine": 0.797
+     }
+    ],
+    "best_cosine": 0.797
+   },
+   "en": {
+    "text": "The passages do not settle this directly. Under Recital 19 and Art. 2(1), software is a medical device when the manufacturer specifically intends it for one or more listed medical purposes, while general-purpose software, even in a healthcare setting, is not. Art. 2(1) lists providing information by means of in vitro examination of specimens derived from the human body as one such purpose. Whether a display-only function for laboratory values falls under that purpose, or under another listed purpose, depends on the manufacturer's stated intended purpose, and the passages do not say how display-only software should be classified. Under Art. 2(2), software intended to be used together with a medical device to enable or directly assist its intended use may instead qualify as an accessory. The passages do not say how to apply these tests to your specific software.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "MDR-REC-19",
+      "title": "Recital 19",
+      "citation": "MDR Recital 19 [recital of the original 2017 text]",
+      "quote": "It is necessary to clarify that software in its own right, when specifically intended by the manufacturer to be used for one or more of the medical purposes set out in the definition of a medical device, qualifies as a medical device, while software for general purposes, even when used in a healthcare setting, or software intended for life-style and well-being purposes is not a medical device. The qualification of software, either as a device or an accessory, is independent of the software's location or the type of interconnection between the software and a device.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32017R0745#rct_19"
+     },
+     {
+      "id": "MDR-2-1",
+      "title": "Definitions",
+      "citation": "MDR Art. 2(1)",
+      "quote": "‘medical device’ means any instrument, apparatus, appliance, software, implant, reagent, material or other article intended by the manufacturer to be used, alone or in combination, for human beings for one or more of the following specific medical purposes:\n  — diagnosis, prevention, monitoring, prediction, prognosis, treatment or alleviation of disease,\n  — diagnosis, monitoring, treatment, alleviation of, or compensation for, an injury or disability,\n  — investigation, replacement or modification of the anatomy or of a physiological or pathological process or state,\n  — providing information by means of in vitro examination of specimens derived from the human body, including organ, blood and tissue donations,\n  and which does not achieve its principal intended action by pharmacological, immunological or metabolic means, in or on the human body, but which may be assisted in its function by such means.\n  The following products shall also be deemed to be medical devices:\n  — devices for the control or support of conception;\n  — products specifically intended for the cleaning, disinfection or sterilisation of devices as referred to in Article 1(4) and of those referred to in the first paragraph of this point.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_2"
+     },
+     {
+      "id": "MDR-2-2",
+      "title": "Definitions",
+      "citation": "MDR Art. 2(2)",
+      "quote": "‘accessory for a medical device’ means an article which, whilst not being itself a medical device, is intended by its manufacturer to be used together with one or several particular medical device(s) to specifically enable the medical device(s) to be used in accordance with its/their intended purpose(s) or to specifically and directly assist the medical functionality of the medical device(s) in terms of its/their intended purpose(s);",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_2"
+     }
+    ],
+    "search_query": "medical device software qualification MDR 2017/745 definition of medical device Article 2(1) software displaying laboratory results intended purpose",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "MDR-REC-19",
+      "citation": "MDR Recital 19 [recital of the original 2017 text]",
+      "score": 0.0325,
+      "cosine": 0.845
+     },
+     {
+      "rank": 2,
+      "id": "MDR-2-2",
+      "citation": "MDR Art. 2(2)",
+      "score": 0.032,
+      "cosine": 0.807
+     },
+     {
+      "rank": 3,
+      "id": "MDR-2-1",
+      "citation": "MDR Art. 2(1)",
+      "score": 0.0315,
+      "cosine": 0.864
+     },
+     {
+      "rank": 4,
+      "id": "MDR-1-7",
+      "citation": "MDR Art. 1(7)",
+      "score": 0.0305,
+      "cosine": 0.77
+     },
+     {
+      "rank": 5,
+      "id": "MDR-1-3",
+      "citation": "MDR Art. 1(3)",
+      "score": 0.0295,
+      "cosine": 0.806
+     },
+     {
+      "rank": 6,
+      "id": "MDR-ANNEX-II-1.1-s1",
+      "citation": "MDR Annex II, point 1.1 (part 1/2)",
+      "score": 0.0282,
+      "cosine": 0.758
+     }
+    ],
+    "best_cosine": 0.864
+   }
+  }
+ },
+ {
+  "id": "ai-diagnosis",
+  "question": {
+   "de": "Welche Pflichten habe ich, wenn mein Produkt ein KI-Modell zur Diagnoseunterstützung enthält?",
+   "en": "What obligations do I have if my product contains an AI model for diagnostic support?"
+  },
+  "replies": {
+   "de": {
+    "text": "Die Quellen beantworten nur einen Teil der Frage. Ist das KI-System ein Hochrisiko-KI-System, treffen den Anbieter die Pflichten aus Art. 16 AI Act, etwa Konformität mit Abschnitt 2, Qualitätsmanagementsystem, technische Dokumentation, Konformitätsbewertung vor dem Inverkehrbringen, EU-Konformitätserklärung, CE-Kennzeichnung und Registrierung. Laut Erwägungsgrund 51 bedeutet die Einstufung als Hochrisiko-KI-System nicht automatisch, dass das Produkt nach der MDR (EU) 2017/745 bzw. IVDR (EU) 2017/746 als hochriskant gilt. Erwägungsgrund 64 besagt, dass beide Regelwerke parallel und ergänzend anzuwenden sind. Nach Art. 73 Abs. 10 ist bei KI-Komponenten von Medizinprodukten die Meldung schwerwiegender Vorfälle auf die Fälle nach Art. 3 Nr. 49 lit. c beschränkt. Wer das Produkt wesentlich verändert oder seinen Namen aufbringt, kann nach Erwägungsgrund 84 als Anbieter gelten. Nicht geklärt ist in den Quellen, ob Ihr konkretes Diagnoseunterstützungssystem als Hochrisiko-KI-System gilt und welche MDR-Klasse und Verfahren gelten; dazu fehlen Angaben.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "AIACT-16",
+      "title": "Obligations of providers of high-risk AI systems",
+      "citation": "AI Act Art. 16",
+      "quote": "Providers of high-risk AI systems shall:\n(a) ensure that their high-risk AI systems are compliant with the requirements set out in Section 2;\n(b) indicate on the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, as applicable, their name, registered trade name or registered trade mark, the address at which they can be contacted;\n(c) have a quality management system in place which complies with Article 17;\n(d) keep the documentation referred to in Article 18;\n(e) when under their control, keep the logs automatically generated by their high-risk AI systems as referred to in Article 19;\n(f) ensure that the high-risk AI system undergoes the relevant conformity assessment procedure as referred to in Article 43, prior to its being placed on the market or put into service;\n(g) draw up an EU declaration of conformity in accordance with Article 47;\n(h) affix the CE marking to the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, to indicate conformity with this Regulation, in accordance with Article 48;\n(i) comply with the registration obligations referred to in Article 49(1);\n(j) take the necessary corrective actions and provide information as required in Article 20;\n(k) upon a reasoned request of a national competent authority, demonstrate the conformity of the high-risk AI system with the requirements set out in Section 2;\n(l) ensure that the high-risk AI system complies with accessibility requirements in accordance with Directives (EU) 2016/2102 and (EU) 2019/882.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#art_16"
+     },
+     {
+      "id": "AIACT-REC-51",
+      "title": "Recital 51",
+      "citation": "AI Act Recital 51",
+      "quote": "The classification of an AI system as high-risk pursuant to this Regulation should not necessarily mean that the product whose safety component is the AI system, or the AI system itself as a product, is considered to be high-risk under the criteria established in the relevant Union harmonisation legislation that applies to the product. This is, in particular, the case for Regulations (EU) 2017/745 and (EU) 2017/746, where a third-party conformity assessment is provided for medium-risk and high-risk products.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#rct_51"
+     },
+     {
+      "id": "AIACT-REC-64-s1",
+      "title": "Recital 64",
+      "citation": "AI Act Recital 64 (part 1/2)",
+      "quote": "To mitigate the risks from high-risk AI systems placed on the market or put into service and to ensure a high level of trustworthiness, certain mandatory requirements should apply to high-risk AI systems, taking into account the intended purpose and the context of use of the AI system and according to the risk-management system to be established by the provider. The measures adopted by the providers to comply with the mandatory requirements of this Regulation should take into account the generally acknowledged state of the art on AI, be proportionate and effective to meet the objectives of this Regulation. Based on the New Legislative Framework, as clarified in Commission notice ‘The “Blue Guide” on the implementation of EU product rules 2022’, the general rule is that more than one legal act of Union harmonisation legislation may be applicable to one product, since the making available or putting into service can take place only when the product complies with all applicable Union harmonisation legislation. The hazards of AI systems covered by the requirements of this Regulation concern different aspects than the existing Union harmonisation legislation and therefore the requirements of this Regulation would complement the existing body of the Union harmonisation legislation. For example, machinery or medical devices products incorporating an AI system might present risks not addressed by the essential health and safety requirements set out in the relevant Union harmonised legislation, as that sectoral law does not deal with risks specific to AI systems. This calls for a simultaneous and complementary application of the various legislative acts.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#rct_64"
+     },
+     {
+      "id": "AIACT-73-10",
+      "title": "Reporting of serious incidents",
+      "citation": "AI Act Art. 73(10)",
+      "quote": "For high-risk AI systems which are safety components of devices, or are themselves devices, covered by Regulations (EU) 2017/745 and (EU) 2017/746, the notification of serious incidents shall be limited to those referred to in Article 3, point (49)(c) of this Regulation, and shall be made to the national competent authority chosen for that purpose by the Member States where the incident occurred.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#art_73"
+     },
+     {
+      "id": "AIACT-REC-84",
+      "title": "Recital 84",
+      "citation": "AI Act Recital 84",
+      "quote": "To ensure legal certainty, it is necessary to clarify that, under certain specific conditions, any distributor, importer, deployer or other third-party should be considered to be a provider of a high-risk AI system and therefore assume all the relevant obligations. This would be the case if that party puts its name or trademark on a high-risk AI system already placed on the market or put into service, without prejudice to contractual arrangements stipulating that the obligations are allocated otherwise. This would also be the case if that party makes a substantial modification to a high-risk AI system that has already been placed on the market or has already been put into service in a way that it remains a high-risk AI system in accordance with this Regulation, or if it modifies the intended purpose of an AI system, including a general-purpose AI system, which has not been classified as high-risk and has already been placed on the market or put into service, in a way that the AI system becomes a high-risk AI system in accordance with this Regulation. Those provisions should apply without prejudice to more specific provisions established in certain Union harmonisation legislation based on the New Legislative Framework, together with which this Regulation should apply. For example, Article 16(2) of Regulation (EU) 2017/745, establishing that certain changes should not be considered to be modifications of a device that could affect its compliance with the applicable requirements, should continue to apply to high-risk AI systems that are medical devices within the meaning of that Regulation.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#rct_84"
+     }
+    ],
+    "search_query": "obligations for AI-based diagnostic support medical device under EU AI Act high-risk AI system and MDR 2017/745 medical device software requirements",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "AIACT-REC-84",
+      "citation": "AI Act Recital 84",
+      "score": 0.032,
+      "cosine": 0.781
+     },
+     {
+      "rank": 2,
+      "id": "AIACT-REC-51",
+      "citation": "AI Act Recital 51",
+      "score": 0.0313,
+      "cosine": 0.777
+     },
+     {
+      "rank": 3,
+      "id": "AIACT-73-10",
+      "citation": "AI Act Art. 73(10)",
+      "score": 0.0286,
+      "cosine": 0.769
+     },
+     {
+      "rank": 4,
+      "id": "AIACT-16",
+      "citation": "AI Act Art. 16",
+      "score": 0.0284,
+      "cosine": 0.805
+     },
+     {
+      "rank": 5,
+      "id": "AIACT-REC-64-s1",
+      "citation": "AI Act Recital 64 (part 1/2)",
+      "score": 0.0266,
+      "cosine": 0.775
+     },
+     {
+      "rank": 6,
+      "id": "AIACT-26-11",
+      "citation": "AI Act Art. 26(11)",
+      "score": 0.0225,
+      "cosine": 0.762
+     }
+    ],
+    "best_cosine": 0.805
+   },
+   "en": {
+    "text": "The passages do not say whether a diagnostic support AI model is a high-risk AI system or which Annex or product legislation applies, so they cannot settle your obligations. If it is high-risk and you are its provider, Article 16 applies, covering conformity with Section 2 requirements, a quality management system, documentation, conformity assessment before placing on the market, EU declaration of conformity, CE marking, registration, and corrective actions. If your product is a medical device and the AI is a safety component of an Annex I Section A product, Article 25(3) makes you (the product manufacturer) the provider when the AI is placed on the market under your name or trademark. Recital 84 adds that Article 16(2) of Regulation (EU) 2017/745 (MDR) on modifications continues to apply to high-risk AI systems that are medical devices. If you integrate a third party's AI model, Recital 88 says that supplier should provide you the necessary information and assistance by written agreement. The passages do not set out the MDR's own requirements.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "AIACT-16",
+      "title": "Obligations of providers of high-risk AI systems",
+      "citation": "AI Act Art. 16",
+      "quote": "Providers of high-risk AI systems shall:\n(a) ensure that their high-risk AI systems are compliant with the requirements set out in Section 2;\n(b) indicate on the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, as applicable, their name, registered trade name or registered trade mark, the address at which they can be contacted;\n(c) have a quality management system in place which complies with Article 17;\n(d) keep the documentation referred to in Article 18;\n(e) when under their control, keep the logs automatically generated by their high-risk AI systems as referred to in Article 19;\n(f) ensure that the high-risk AI system undergoes the relevant conformity assessment procedure as referred to in Article 43, prior to its being placed on the market or put into service;\n(g) draw up an EU declaration of conformity in accordance with Article 47;\n(h) affix the CE marking to the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, to indicate conformity with this Regulation, in accordance with Article 48;\n(i) comply with the registration obligations referred to in Article 49(1);\n(j) take the necessary corrective actions and provide information as required in Article 20;\n(k) upon a reasoned request of a national competent authority, demonstrate the conformity of the high-risk AI system with the requirements set out in Section 2;\n(l) ensure that the high-risk AI system complies with accessibility requirements in accordance with Directives (EU) 2016/2102 and (EU) 2019/882.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#art_16"
+     },
+     {
+      "id": "AIACT-25-1",
+      "title": "Responsibilities along the AI value chain",
+      "citation": "AI Act Art. 25(1)",
+      "quote": "Any distributor, importer, deployer or other third-party shall be considered to be a provider of a high-risk AI system for the purposes of this Regulation and shall be subject to the obligations of the provider under Article 16, in any of the following circumstances:\n(a) they put their name or trademark on a high-risk AI system already placed on the market or put into service, without prejudice to contractual arrangements stipulating that the obligations are otherwise allocated;\n(b) they make a substantial modification to a high-risk AI system that has already been placed on the market or has already been put into service in such a way that it remains a high-risk AI system pursuant to Article 6;\n(c) they modify the intended purpose of an AI system, including a general-purpose AI system, which has not been classified as high-risk and has already been placed on the market or put into service in such a way that the AI system concerned becomes a high-risk AI system in accordance with Article 6.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#art_25"
+     },
+     {
+      "id": "AIACT-25-3",
+      "title": "Responsibilities along the AI value chain",
+      "citation": "AI Act Art. 25(3)",
+      "quote": "In the case of high-risk AI systems that are safety components of products covered by the Union harmonisation legislation listed in Section A of Annex I, the product manufacturer shall be considered to be the provider of the high-risk AI system, and shall be subject to the obligations under Article 16 under either of the following circumstances:\n(a) the high-risk AI system is placed on the market together with the product under the name or trademark of the product manufacturer;\n(b) the high-risk AI system is put into service under the name or trademark of the product manufacturer after the product has been placed on the market.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#art_25"
+     },
+     {
+      "id": "AIACT-REC-84",
+      "title": "Recital 84",
+      "citation": "AI Act Recital 84",
+      "quote": "To ensure legal certainty, it is necessary to clarify that, under certain specific conditions, any distributor, importer, deployer or other third-party should be considered to be a provider of a high-risk AI system and therefore assume all the relevant obligations. This would be the case if that party puts its name or trademark on a high-risk AI system already placed on the market or put into service, without prejudice to contractual arrangements stipulating that the obligations are allocated otherwise. This would also be the case if that party makes a substantial modification to a high-risk AI system that has already been placed on the market or has already been put into service in a way that it remains a high-risk AI system in accordance with this Regulation, or if it modifies the intended purpose of an AI system, including a general-purpose AI system, which has not been classified as high-risk and has already been placed on the market or put into service, in a way that the AI system becomes a high-risk AI system in accordance with this Regulation. Those provisions should apply without prejudice to more specific provisions established in certain Union harmonisation legislation based on the New Legislative Framework, together with which this Regulation should apply. For example, Article 16(2) of Regulation (EU) 2017/745, establishing that certain changes should not be considered to be modifications of a device that could affect its compliance with the applicable requirements, should continue to apply to high-risk AI systems that are medical devices within the meaning of that Regulation.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#rct_84"
+     },
+     {
+      "id": "AIACT-REC-88",
+      "title": "Recital 88",
+      "citation": "AI Act Recital 88",
+      "quote": "Along the AI value chain multiple parties often supply AI systems, tools and services but also components or processes that are incorporated by the provider into the AI system with various objectives, including the model training, model retraining, model testing and evaluation, integration into software, or other aspects of model development. Those parties have an important role to play in the value chain towards the provider of the high-risk AI system into which their AI systems, tools, services, components or processes are integrated, and should provide by written agreement this provider with the necessary information, capabilities, technical access and other assistance based on the generally acknowledged state of the art, in order to enable the provider to fully comply with the obligations set out in this Regulation, without compromising their own intellectual property rights or trade secrets.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#rct_88"
+     }
+    ],
+    "search_query": "obligations provider medical device software containing AI system for diagnostic support, high-risk AI system, MDR 2017/745, AI Act Article 6 and Article 16",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "AIACT-REC-84",
+      "citation": "AI Act Recital 84",
+      "score": 0.0315,
+      "cosine": 0.753
+     },
+     {
+      "rank": 2,
+      "id": "AIACT-25-1",
+      "citation": "AI Act Art. 25(1)",
+      "score": 0.0315,
+      "cosine": 0.754
+     },
+     {
+      "rank": 3,
+      "id": "AIACT-16",
+      "citation": "AI Act Art. 16",
+      "score": 0.0292,
+      "cosine": 0.777
+     },
+     {
+      "rank": 4,
+      "id": "AIACT-6-4",
+      "citation": "AI Act Art. 6(4)",
+      "score": 0.029,
+      "cosine": 0.743
+     },
+     {
+      "rank": 5,
+      "id": "AIACT-25-3",
+      "citation": "AI Act Art. 25(3)",
+      "score": 0.0289,
+      "cosine": 0.734
+     },
+     {
+      "rank": 6,
+      "id": "AIACT-REC-88",
+      "citation": "AI Act Recital 88",
+      "score": 0.0273,
+      "cosine": 0.752
+     }
+    ],
+    "best_cosine": 0.777
+   }
+  }
+ },
+ {
+  "id": "health-data-training",
+  "question": {
+   "de": "Darf ich Gesundheitsdaten für das Training eines Modells verwenden?",
+   "en": "May I use health data to train a model?"
+  },
+  "replies": {
+   "de": {
+    "text": "Gesundheitsdaten sind besondere Kategorien personenbezogener Daten. Ihre Verarbeitung ist nach Art. 9 Abs. 1 DSGVO grundsätzlich untersagt. Ausnahmen nach Art. 9 Abs. 2 DSGVO (z. B. lit. g, h, i oder j) setzen eine Grundlage im Unionsrecht oder im Recht eines Mitgliedstaats voraus, und Mitgliedstaaten können weitere Bedingungen vorsehen (Art. 9 Abs. 4 DSGVO). Art. 10 Abs. 5 AI Act erlaubt Anbietern von Hochrisiko-KI-Systemen eine Ausnahme nur zur Erkennung und Korrektur von Verzerrungen (Bias), wenn sie erforderlich ist und die Bedingungen a bis f erfüllt sind, etwa Löschung nach der Korrektur und Dokumentation. Die Passagen regeln nicht allgemein, ob Gesundheitsdaten für das Training eines Modells verwendet werden dürfen. Ob ein konkreter Fall zulässig ist, lässt sich daraus nicht abschließend beurteilen.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "GDPR-9-1",
+      "title": "Processing of special categories of personal data",
+      "citation": "GDPR Art. 9(1)",
+      "quote": "Processing of personal data revealing racial or ethnic origin, political opinions, religious or philosophical beliefs, or trade union membership, and the processing of genetic data, biometric data for the purpose of uniquely identifying a natural person, data concerning health or data concerning a natural person's sex life or sexual orientation shall be prohibited.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_9"
+     },
+     {
+      "id": "GDPR-9-2-s2",
+      "title": "Processing of special categories of personal data",
+      "citation": "GDPR Art. 9(2) (part 2/2)",
+      "quote": "Paragraph 1 shall not apply if one of the following applies:\n(g) processing is necessary for reasons of substantial public interest, on the basis of Union or Member State law which shall be proportionate to the aim pursued, respect the essence of the right to data protection and provide for suitable and specific measures to safeguard the fundamental rights and the interests of the data subject;\n(h) processing is necessary for the purposes of preventive or occupational medicine, for the assessment of the working capacity of the employee, medical diagnosis, the provision of health or social care or treatment or the management of health or social care systems and services on the basis of Union or Member State law or pursuant to contract with a health professional and subject to the conditions and safeguards referred to in paragraph 3;\n(i) processing is necessary for reasons of public interest in the area of public health, such as protecting against serious cross-border threats to health or ensuring high standards of quality and safety of health care and of medicinal products or medical devices, on the basis of Union or Member State law which provides for suitable and specific measures to safeguard the rights and freedoms of the data subject, in particular professional secrecy;\n(j) processing is necessary for archiving purposes in the public interest, scientific or historical research purposes or statistical purposes in accordance with Article 89(1) based on Union or Member State law which shall be proportionate to the aim pursued, respect the essence of the right to data protection and provide for suitable and specific measures to safeguard the fundamental rights and the interests of the data subject.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_9"
+     },
+     {
+      "id": "GDPR-9-4",
+      "title": "Processing of special categories of personal data",
+      "citation": "GDPR Art. 9(4)",
+      "quote": "Member States may maintain or introduce further conditions, including limitations, with regard to the processing of genetic data, biometric data or data concerning health.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_9"
+     },
+     {
+      "id": "AIACT-10-5",
+      "title": "Data and data governance",
+      "citation": "AI Act Art. 10(5)",
+      "quote": "To the extent that it is strictly necessary for the purpose of ensuring bias detection and correction in relation to the high-risk AI systems in accordance with paragraph (2), points (f) and (g) of this Article, the providers of such systems may exceptionally process special categories of personal data, subject to appropriate safeguards for the fundamental rights and freedoms of natural persons. In addition to the provisions set out in Regulations (EU) 2016/679 and (EU) 2018/1725 and Directive (EU) 2016/680, all the following conditions must be met in order for such processing to occur:\n(a) the bias detection and correction cannot be effectively fulfilled by processing other data, including synthetic or anonymised data;\n(b) the special categories of personal data are subject to technical limitations on the re-use of the personal data, and state-of-the-art security and privacy-preserving measures, including pseudonymisation;\n(c) the special categories of personal data are subject to measures to ensure that the personal data processed are secured, protected, subject to suitable safeguards, including strict controls and documentation of the access, to avoid misuse and ensure that only authorised persons have access to those personal data with appropriate confidentiality obligations;\n(d) the special categories of personal data are not to be transmitted, transferred or otherwise accessed by other parties;\n(e) the special categories of personal data are deleted once the bias has been corrected or the personal data has reached the end of its retention period, whichever comes first;\n(f) the records of processing activities pursuant to Regulations (EU) 2016/679 and (EU) 2018/1725 and Directive (EU) 2016/680 include the reasons why the processing of special categories of personal data was strictly necessary to detect and correct biases, and why that objective could not be achieved by processing other data.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32024R1689#art_10"
+     },
+     {
+      "id": "GDPR-REC-53",
+      "title": "Recital 53",
+      "citation": "GDPR Recital 53",
+      "quote": "Special categories of personal data which merit higher protection should be processed for health-related purposes only where necessary to achieve those purposes for the benefit of natural persons and society as a whole, in particular in the context of the management of health or social care services and systems, including processing by the management and central national health authorities of such data for the purpose of quality control, management information and the general national and local supervision of the health or social care system, and ensuring continuity of health or social care and cross-border healthcare or health security, monitoring and alert purposes, or for archiving purposes in the public interest, scientific or historical research purposes or statistical purposes, based on Union or Member State law which has to meet an objective of public interest, as well as for studies conducted in the public interest in the area of public health. Therefore, this Regulation should provide for harmonised conditions for the processing of special categories of personal data concerning health, in respect of specific needs, in particular where the processing of such data is carried out for certain health-related purposes by persons subject to a legal obligation of professional secrecy. Union or Member State law should provide for specific and suitable measures so as to protect the fundamental rights and the personal data of natural persons. Member States should be allowed to maintain or introduce further conditions, including limitations, with regard to the processing of genetic data, biometric data or data concerning health. However, this should not hamper the free flow of personal data within the Union when those conditions apply to cross-border processing of such data.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#rct_53"
+     }
+    ],
+    "search_query": "processing of health data for training an AI model GDPR Article 9 special categories of personal data legal basis",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "AIACT-10-5",
+      "citation": "AI Act Art. 10(5)",
+      "score": 0.0313,
+      "cosine": 0.82
+     },
+     {
+      "rank": 2,
+      "id": "GDPR-REC-53",
+      "citation": "GDPR Recital 53",
+      "score": 0.031,
+      "cosine": 0.804
+     },
+     {
+      "rank": 3,
+      "id": "GDPR-9-4",
+      "citation": "GDPR Art. 9(4)",
+      "score": 0.0294,
+      "cosine": 0.783
+     },
+     {
+      "rank": 4,
+      "id": "GDPR-9-2-s2",
+      "citation": "GDPR Art. 9(2) (part 2/2)",
+      "score": 0.0292,
+      "cosine": 0.793
+     },
+     {
+      "rank": 5,
+      "id": "AIACT-3-37",
+      "citation": "AI Act Art. 3(37)",
+      "score": 0.0291,
+      "cosine": 0.785
+     },
+     {
+      "rank": 6,
+      "id": "GDPR-9-1",
+      "citation": "GDPR Art. 9(1)",
+      "score": 0.0288,
+      "cosine": 0.78
+     }
+    ],
+    "best_cosine": 0.82
+   },
+   "en": {
+    "text": "Not directly, and not without a legal basis. Health data is a special category that is prohibited to process under Art. 9(1) GDPR unless an exception in Art. 9(2) applies. The passages most relevant to model training are Art. 9(2)(j), which covers scientific research purposes under Art. 89(1) based on Union or Member State law that is proportionate and includes suitable safeguards, and Recital 159, which says scientific research should be interpreted broadly, including privately funded research. Art. 9(4) and Recital 53 also allow Member States to add further conditions or limitations on health data. The passages do not say whether training a model counts as scientific research or another permitted purpose, which specific law would provide the basis, or what the Member State conditions are. Art. 21(6) gives data subjects a right to object to such research processing on grounds relating to their particular situation, unless it is necessary for a task carried out in the public interest.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "GDPR-9-1",
+      "title": "Processing of special categories of personal data",
+      "citation": "GDPR Art. 9(1)",
+      "quote": "Processing of personal data revealing racial or ethnic origin, political opinions, religious or philosophical beliefs, or trade union membership, and the processing of genetic data, biometric data for the purpose of uniquely identifying a natural person, data concerning health or data concerning a natural person's sex life or sexual orientation shall be prohibited.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_9"
+     },
+     {
+      "id": "GDPR-9-2-s2",
+      "title": "Processing of special categories of personal data",
+      "citation": "GDPR Art. 9(2) (part 2/2)",
+      "quote": "Paragraph 1 shall not apply if one of the following applies:\n(g) processing is necessary for reasons of substantial public interest, on the basis of Union or Member State law which shall be proportionate to the aim pursued, respect the essence of the right to data protection and provide for suitable and specific measures to safeguard the fundamental rights and the interests of the data subject;\n(h) processing is necessary for the purposes of preventive or occupational medicine, for the assessment of the working capacity of the employee, medical diagnosis, the provision of health or social care or treatment or the management of health or social care systems and services on the basis of Union or Member State law or pursuant to contract with a health professional and subject to the conditions and safeguards referred to in paragraph 3;\n(i) processing is necessary for reasons of public interest in the area of public health, such as protecting against serious cross-border threats to health or ensuring high standards of quality and safety of health care and of medicinal products or medical devices, on the basis of Union or Member State law which provides for suitable and specific measures to safeguard the rights and freedoms of the data subject, in particular professional secrecy;\n(j) processing is necessary for archiving purposes in the public interest, scientific or historical research purposes or statistical purposes in accordance with Article 89(1) based on Union or Member State law which shall be proportionate to the aim pursued, respect the essence of the right to data protection and provide for suitable and specific measures to safeguard the fundamental rights and the interests of the data subject.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_9"
+     },
+     {
+      "id": "GDPR-REC-159",
+      "title": "Recital 159",
+      "citation": "GDPR Recital 159",
+      "quote": "Where personal data are processed for scientific research purposes, this Regulation should also apply to that processing. For the purposes of this Regulation, the processing of personal data for scientific research purposes should be interpreted in a broad manner including for example technological development and demonstration, fundamental research, applied research and privately funded research. In addition, it should take into account the Union's objective under Article 179(1) TFEU of achieving a European Research Area. Scientific research purposes should also include studies conducted in the public interest in the area of public health. To meet the specificities of processing personal data for scientific research purposes, specific conditions should apply in particular as regards the publication or otherwise disclosure of personal data in the context of scientific research purposes. If the result of scientific research in particular in the health context gives reason for further measures in the interest of the data subject, the general rules of this Regulation should apply in view of those measures.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#rct_159"
+     },
+     {
+      "id": "GDPR-9-4",
+      "title": "Processing of special categories of personal data",
+      "citation": "GDPR Art. 9(4)",
+      "quote": "Member States may maintain or introduce further conditions, including limitations, with regard to the processing of genetic data, biometric data or data concerning health.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_9"
+     },
+     {
+      "id": "GDPR-REC-53",
+      "title": "Recital 53",
+      "citation": "GDPR Recital 53",
+      "quote": "Special categories of personal data which merit higher protection should be processed for health-related purposes only where necessary to achieve those purposes for the benefit of natural persons and society as a whole, in particular in the context of the management of health or social care services and systems, including processing by the management and central national health authorities of such data for the purpose of quality control, management information and the general national and local supervision of the health or social care system, and ensuring continuity of health or social care and cross-border healthcare or health security, monitoring and alert purposes, or for archiving purposes in the public interest, scientific or historical research purposes or statistical purposes, based on Union or Member State law which has to meet an objective of public interest, as well as for studies conducted in the public interest in the area of public health. Therefore, this Regulation should provide for harmonised conditions for the processing of special categories of personal data concerning health, in respect of specific needs, in particular where the processing of such data is carried out for certain health-related purposes by persons subject to a legal obligation of professional secrecy. Union or Member State law should provide for specific and suitable measures so as to protect the fundamental rights and the personal data of natural persons. Member States should be allowed to maintain or introduce further conditions, including limitations, with regard to the processing of genetic data, biometric data or data concerning health. However, this should not hamper the free flow of personal data within the Union when those conditions apply to cross-border processing of such data.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#rct_53"
+     },
+     {
+      "id": "GDPR-21-6",
+      "title": "Right to object",
+      "citation": "GDPR Art. 21(6)",
+      "quote": "Where personal data are processed for scientific or historical research purposes or statistical purposes pursuant to Article 89(1), the data subject, on grounds relating to his or her particular situation, shall have the right to object to processing of personal data concerning him or her, unless the processing is necessary for the performance of a task carried out for reasons of public interest.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32016R0679#art_21"
+     }
+    ],
+    "search_query": "processing of health data for training machine learning models GDPR special categories of personal data Article 9 Article 6 legal basis scientific research Article 89",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "GDPR-9-4",
+      "citation": "GDPR Art. 9(4)",
+      "score": 0.032,
+      "cosine": 0.796
+     },
+     {
+      "rank": 2,
+      "id": "GDPR-9-2-s2",
+      "citation": "GDPR Art. 9(2) (part 2/2)",
+      "score": 0.032,
+      "cosine": 0.799
+     },
+     {
+      "rank": 3,
+      "id": "GDPR-REC-53",
+      "citation": "GDPR Recital 53",
+      "score": 0.0313,
+      "cosine": 0.817
+     },
+     {
+      "rank": 4,
+      "id": "GDPR-9-1",
+      "citation": "GDPR Art. 9(1)",
+      "score": 0.0303,
+      "cosine": 0.787
+     },
+     {
+      "rank": 5,
+      "id": "GDPR-REC-159",
+      "citation": "GDPR Recital 159",
+      "score": 0.0301,
+      "cosine": 0.784
+     },
+     {
+      "rank": 6,
+      "id": "GDPR-21-6",
+      "citation": "GDPR Art. 21(6)",
+      "score": 0.0294,
+      "cosine": 0.763
+     }
+    ],
+    "best_cosine": 0.817
+   }
+  }
+ },
+ {
+  "id": "rule-11",
+  "question": {
+   "de": "In welche Risikoklasse fällt Software, die Entscheidungen für Diagnose oder Therapie unterstützt?",
+   "en": "Which risk class does software that supports diagnostic or therapeutic decisions fall into?"
+  },
+  "replies": {
+   "de": {
+    "text": "Nach Anhang VIII, Nr. 6.3 (Regel 11) MDR ist Software, die Informationen liefert, die für diagnostische oder therapeutische Entscheidungen verwendet werden, grundsätzlich Klasse IIa. Sie ist Klasse III, wenn die Entscheidungen zum Tod oder zu einer irreversiblen Verschlechterung des Gesundheitszustands führen können, und Klasse IIb, wenn sie eine ernsthafte Verschlechterung des Gesundheitszustands oder einen chirurgischen Eingriff bewirken können. Die Passagen regeln nicht, wie die Auswirkungen im Einzelfall zu bewerten sind.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "MDR-ANNEX-VIII-6.3",
+      "title": "Annex VIII: CLASSIFICATION RULES > CHAPTER III - CLASSIFICATION RULES > 6. ACTIVE DEVICES > 6.3. Rule 11",
+      "citation": "MDR Annex VIII, point 6.3 (Rule 11)",
+      "quote": "Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause:\n— death or an irreversible deterioration of a person's state of health, in which case it is in class III; or\n— a serious deterioration of a person's state of health or a surgical intervention, in which case it is classified as class IIb.\nSoftware intended to monitor physiological processes is classified as class IIa, except if it is intended for monitoring of vital physiological parameters, where the nature of variations of those parameters is such that it could result in immediate danger to the patient, in which case it is classified as class IIb.\nAll other software is classified as class I.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#anx_VIII"
+     }
+    ],
+    "search_query": "medical device software classification Annex VIII Rule 11 diagnosis therapy decisions risk class",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "MDR-ANNEX-VIII-6.3",
+      "citation": "MDR Annex VIII, point 6.3 (Rule 11)",
+      "score": 0.0328,
+      "cosine": 0.83
+     },
+     {
+      "rank": 2,
+      "id": "MDR-ANNEX-VIII-7.9",
+      "citation": "MDR Annex VIII, point 7.9 (Rule 22)",
+      "score": 0.0313,
+      "cosine": 0.799
+     },
+     {
+      "rank": 3,
+      "id": "MDR-ANNEX-VIII-3.3",
+      "citation": "MDR Annex VIII, point 3.3",
+      "score": 0.0308,
+      "cosine": 0.766
+     },
+     {
+      "rank": 4,
+      "id": "MDR-ANNEX-VIII-3.7",
+      "citation": "MDR Annex VIII, point 3.7",
+      "score": 0.0308,
+      "cosine": 0.777
+     },
+     {
+      "rank": 5,
+      "id": "MDR-ANNEX-VIII-7.4",
+      "citation": "MDR Annex VIII, point 7.4 (Rule 17)",
+      "score": 0.0288,
+      "cosine": 0.759
+     },
+     {
+      "rank": 6,
+      "id": "MDR-ANNEX-VIII-6.2",
+      "citation": "MDR Annex VIII, point 6.2 (Rule 10)",
+      "score": 0.0284,
+      "cosine": 0.744
+     }
+    ],
+    "best_cosine": 0.83
+   },
+   "en": {
+    "text": "Under MDR Annex VIII, point 6.3 (Rule 11), software intended to provide information used to take decisions with diagnosis or therapeutic purposes is class IIa by default. It is class III if those decisions may cause death or irreversible deterioration of a person's state of health, and class IIb if they may cause a serious deterioration of health or a surgical intervention. Where several rules apply, the strictest one resulting in the higher class applies (point 3.5). The passages do not address software whose decisions carry no such impact beyond what is stated, nor how the impact is to be assessed.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "MDR-ANNEX-VIII-6.3",
+      "title": "Annex VIII: CLASSIFICATION RULES > CHAPTER III - CLASSIFICATION RULES > 6. ACTIVE DEVICES > 6.3. Rule 11",
+      "citation": "MDR Annex VIII, point 6.3 (Rule 11)",
+      "quote": "Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause:\n— death or an irreversible deterioration of a person's state of health, in which case it is in class III; or\n— a serious deterioration of a person's state of health or a surgical intervention, in which case it is classified as class IIb.\nSoftware intended to monitor physiological processes is classified as class IIa, except if it is intended for monitoring of vital physiological parameters, where the nature of variations of those parameters is such that it could result in immediate danger to the patient, in which case it is classified as class IIb.\nAll other software is classified as class I.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#anx_VIII"
+     },
+     {
+      "id": "MDR-ANNEX-VIII-3.5",
+      "title": "Annex VIII: CLASSIFICATION RULES > CHAPTER II - IMPLEMENTING RULES",
+      "citation": "MDR Annex VIII, point 3.5",
+      "quote": "If several rules, or if, within the same rule, several sub-rules, apply to the same device based on the device's intended purpose, the strictest rule and sub-rule resulting in the higher classification shall apply.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#anx_VIII"
+     }
+    ],
+    "search_query": "classification of medical device software under MDR Annex VIII Rule 11 risk class diagnostic or therapeutic decisions",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "MDR-ANNEX-VIII-6.3",
+      "citation": "MDR Annex VIII, point 6.3 (Rule 11)",
+      "score": 0.0328,
+      "cosine": 0.847
+     },
+     {
+      "rank": 2,
+      "id": "MDR-ANNEX-VIII-7.9",
+      "citation": "MDR Annex VIII, point 7.9 (Rule 22)",
+      "score": 0.0318,
+      "cosine": 0.822
+     },
+     {
+      "rank": 3,
+      "id": "MDR-ANNEX-VIII-3.3",
+      "citation": "MDR Annex VIII, point 3.3",
+      "score": 0.031,
+      "cosine": 0.811
+     },
+     {
+      "rank": 4,
+      "id": "MDR-ANNEX-VIII-7.4",
+      "citation": "MDR Annex VIII, point 7.4 (Rule 17)",
+      "score": 0.03,
+      "cosine": 0.791
+     },
+     {
+      "rank": 5,
+      "id": "MDR-ANNEX-VIII-2.4",
+      "citation": "MDR Annex VIII, point 2.4",
+      "score": 0.0273,
+      "cosine": 0.793
+     },
+     {
+      "rank": 6,
+      "id": "MDR-ANNEX-VIII-3.5",
+      "citation": "MDR Annex VIII, point 3.5",
+      "score": 0.027,
+      "cosine": 0.779
+     }
+    ],
+    "best_cosine": 0.847
+   }
+  }
+ },
+ {
+  "id": "manufacturer-duties",
+  "question": {
+   "de": "Welche allgemeinen Pflichten haben Hersteller von Medizinprodukten nach der MDR?",
+   "en": "What are the general obligations of manufacturers of medical devices under the MDR?"
+  },
+  "replies": {
+   "de": {
+    "text": "Die bereitgestellten Passagen enthalten nur einen Ausschnitt der Herstellerpflichten. Nach Art. 10(14) MDR muss der Hersteller einer zuständigen Behörde auf Verlangen alle Informationen und Unterlagen zur Verfügung stellen, die zum Nachweis der Konformität des Produkts nötig sind, und zwar in einer von dem betreffenden Mitgliedstaat bestimmten Amtssprache. Er muss außerdem mit der Behörde bei Korrekturmaßnahmen zusammenarbeiten, mit denen Risiken beseitigt oder, falls das nicht möglich ist, gemindert werden sollen. Die Passagen regeln nicht die allgemeinen Pflichten insgesamt, etwa Konformitätsbewertung, Kennzeichnung oder Risikomanagement.",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "MDR-10-14-s1",
+      "title": "General obligations of manufacturers",
+      "citation": "MDR Art. 10(14) (part 1/2)",
+      "quote": "Manufacturers shall, upon request by a competent authority, provide it with all the information and documentation necessary to demonstrate the conformity of the device, in an official Union language determined by the Member State concerned. The competent authority of the Member State in which the manufacturer has its registered place of business may require that the manufacturer provide samples of the device free of charge or, where that is impracticable, grant access to the device. Manufacturers shall cooperate with a competent authority, at its request, on any corrective action taken to eliminate or, if that is not possible, mitigate the risks posed by devices which they have placed on the market or put into service.\nIf the manufacturer fails to cooperate or the information and documentation provided is incomplete or incorrect, the competent authority may, in order to ensure the protection of public health and patient safety, take all appropriate measures to prohibit or restrict the device's being made available on its national market, to withdraw the device from that market or to recall it until the manufacturer cooperates or provides complete and correct information.\nIf a competent authority considers or has reason to believe that a device has caused damage, it shall, upon request, facilitate the provision of the information and documentation referred to in the first subparagraph to the potentially injured patient or user and, as appropriate, the patient's or user's successor in title, the patient's or user's health insurance company or other third parties affected by the damage caused to the patient or user, without prejudice to data protection rules and, unless there is an overriding public interest in disclosure, without prejudice to the protection of intellectual property rights.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_10"
+     }
+    ],
+    "search_query": "manufacturer general obligations medical devices MDR 2017/745",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "MDR-14-3",
+      "citation": "MDR Art. 14(3)",
+      "score": 0.0244,
+      "cosine": 0.786
+     },
+     {
+      "rank": 2,
+      "id": "MDR-14-5",
+      "citation": "MDR Art. 14(5)",
+      "score": 0.0243,
+      "cosine": 0.78
+     },
+     {
+      "rank": 3,
+      "id": "MDR-13-5",
+      "citation": "MDR Art. 13(5)",
+      "score": 0.0213,
+      "cosine": 0.77
+     },
+     {
+      "rank": 4,
+      "id": "MDR-103-9",
+      "citation": "MDR Art. 103(9)",
+      "score": 0.0199,
+      "cosine": 0.756
+     },
+     {
+      "rank": 5,
+      "id": "MDR-118",
+      "citation": "MDR Art. 118",
+      "score": 0.0164,
+      "cosine": 0.716
+     },
+     {
+      "rank": 6,
+      "id": "MDR-10-14-s1",
+      "citation": "MDR Art. 10(14) (part 1/2)",
+      "score": 0.0164,
+      "cosine": 0.823
+     }
+    ],
+    "best_cosine": 0.823
+   },
+   "en": {
+    "text": "The passages set out several general manufacturer obligations under the MDR: keeping up-to-date technical documentation that allows conformity to be assessed and includes the elements of Annexes II and III (Art. 10(4)); establishing, documenting, implementing and maintaining a risk management system per Annex I, Section 3 (Art. 10(2)); establishing, documenting, implementing, maintaining and continually improving a quality management system proportionate to risk class and device type, covering aspects such as regulatory compliance strategy, risk management, clinical evaluation and product realisation, and keeping series production in conformity (Art. 10(9); Annex IX, point 1); keeping technical documentation, the EU declaration of conformity and certificates available to competent authorities for at least 10 years after the last device is placed on the market, or 15 years for implantable devices (Art. 10(8)); and implementing and keeping up to date a post-market surveillance system under Art. 83 (Art. 10(10)). The passages do not provide a complete list of all manufacturer obligations, and the Art. 10(9) text is only partly reproduced (part 1/2).",
+    "found": true,
+    "reason": "answered",
+    "sources": [
+     {
+      "id": "MDR-10-4",
+      "title": "General obligations of manufacturers",
+      "citation": "MDR Art. 10(4)",
+      "quote": "Manufacturers of devices other than custom-made devices shall draw up and keep up to date technical documentation for those devices. The technical documentation shall be such as to allow the conformity of the device with the requirements of this Regulation to be assessed. The technical documentation shall include the elements set out in Annexes II and III.\nThe Commission is empowered to adopt delegated acts in accordance with Article 115 amending, in the light of technical progress, the Annexes II and III.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_10"
+     },
+     {
+      "id": "MDR-10-2",
+      "title": "General obligations of manufacturers",
+      "citation": "MDR Art. 10(2)",
+      "quote": "Manufacturers shall establish, document, implement and maintain a system for risk management as described in Section 3 of Annex I.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_10"
+     },
+     {
+      "id": "MDR-10-9-s1",
+      "title": "General obligations of manufacturers",
+      "citation": "MDR Art. 10(9) (part 1/2)",
+      "quote": "Manufacturers shall ensure that procedures are in place to keep series production in conformity with the requirements of this Regulation. Changes in device design or characteristics and changes in the harmonised standards or CS by reference to which the conformity of a device is declared shall be adequately taken into account in a timely manner. Manufacturers of devices, other than investigational devices, shall establish, document, implement, maintain, keep up to date and continually improve a quality management system that shall ensure compliance with this Regulation in the most effective manner and in a manner that is proportionate to the risk class and the type of device.\nThe quality management system shall cover all parts and elements of a manufacturer's organisation dealing with the quality of processes, procedures and devices. It shall govern the structure, responsibilities, procedures, processes and management resources required to implement the principles and actions necessary to achieve compliance with the provisions of this Regulation.\nThe quality management system shall address at least the following aspects:\n(a) a strategy for regulatory compliance, including compliance with conformity assessment procedures and procedures for management of modifications to the devices covered by the system;\n(b) identification of applicable general safety and performance requirements and exploration of options to address those requirements;\n(c) responsibility of the management;\n(d) resource management, including selection and control of suppliers and sub-contractors;\n(e) risk management as set out in in Section 3 of Annex I;\n(f) clinical evaluation in accordance with Article 61 and Annex XIV, including PMCF;\n(g) product realisation, including planning, design, development, production and service provision;",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_10"
+     },
+     {
+      "id": "MDR-ANNEX-IX-1",
+      "title": "Annex IX: CONFORMITY ASSESSMENT BASED ON A QUALITY MANAGEMENT SYSTEM AND ON ASSESSMENT OF TECHNICAL DOCUMENTATION > CHAPTER I - QUALITY MANAGEMENT SYSTEM",
+      "citation": "MDR Annex IX, point 1",
+      "quote": "The manufacturer shall establish, document and implement a quality management system as described in Article 10(9) and maintain its effectiveness throughout the life cycle of the devices concerned. The manufacturer shall ensure the application of the quality management system as specified in Section 2 and shall be subject to audit, as laid down in Sections 2.3 and 2.4, and to surveillance as specified in Section 3.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#anx_IX"
+     },
+     {
+      "id": "MDR-10-8",
+      "title": "General obligations of manufacturers",
+      "citation": "MDR Art. 10(8)",
+      "quote": "Manufacturers shall keep the technical documentation, the EU declaration of conformity and, if applicable, a copy of any relevant certificate, including any amendments and supplements, issued in accordance with Article 56, available for the competent authorities for a period of at least 10 years after the last device covered by the EU declaration of conformity has been placed on the market. In the case of implantable devices, the period shall be at least 15 years after the last device has been placed on the market.\nUpon request by a competent authority, the manufacturer shall, as indicated therein, provide that technical documentation in its entirety or a summary thereof.\nA manufacturer with a registered place of business outside the Union shall, in order to allow its authorised representative to fulfil the tasks mentioned in Article 11(3), ensure that the authorised representative has the necessary documentation permanently available.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_10"
+     },
+     {
+      "id": "MDR-10-10",
+      "title": "General obligations of manufacturers",
+      "citation": "MDR Art. 10(10)",
+      "quote": "Manufacturers of devices shall implement and keep up to date the post-market surveillance system in accordance with Article 83.",
+      "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02017R0745-20260101#art_10"
+     }
+    ],
+    "search_query": "general obligations of manufacturers medical devices MDR 2017/745 Article 10 quality management system technical documentation conformity",
+    "hits": [
+     {
+      "rank": 1,
+      "id": "MDR-10-4",
+      "citation": "MDR Art. 10(4)",
+      "score": 0.0323,
+      "cosine": 0.852
+     },
+     {
+      "rank": 2,
+      "id": "MDR-10-9-s1",
+      "citation": "MDR Art. 10(9) (part 1/2)",
+      "score": 0.032,
+      "cosine": 0.885
+     },
+     {
+      "rank": 3,
+      "id": "MDR-10-2",
+      "citation": "MDR Art. 10(2)",
+      "score": 0.0294,
+      "cosine": 0.838
+     },
+     {
+      "rank": 4,
+      "id": "MDR-10-8",
+      "citation": "MDR Art. 10(8)",
+      "score": 0.0293,
+      "cosine": 0.847
+     },
+     {
+      "rank": 5,
+      "id": "MDR-10-10",
+      "citation": "MDR Art. 10(10)",
+      "score": 0.0288,
+      "cosine": 0.827
+     },
+     {
+      "rank": 6,
+      "id": "MDR-ANNEX-IX-1",
+      "citation": "MDR Annex IX, point 1",
+      "score": 0.0286,
+      "cosine": 0.81
+     }
+    ],
+    "best_cosine": 0.885
+   }
+  }
+ }
+]
