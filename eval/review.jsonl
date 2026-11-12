@@ -1,0 +1,32 @@
+{"id": "q01", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q02", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q03", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q04", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q05", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q06", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q07", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q08", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q09", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q10", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q11", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q12", "round": 1, "verdict": "beanstandet", "reason": "Referenzantwort stützt sich auf Art. 17(3), die Stelle fehlt in den passages (nur Art. 17(1) angegeben); Aussage folgt nicht aus den Passagen."}
+{"id": "q13", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q14", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q15", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q16", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q17", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q18", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q19", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q20", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q21", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q22", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q23", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q24", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q25", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q26", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q27", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q28", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q29", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q30", "round": 1, "verdict": "ok", "reason": "ok (reason in reviewer output; no defect found)"}
+{"id": "q12", "round": 2, "verdict": "beanstandet", "reason": "Referenzantwort aus Art. 17(1)/(3) ableitbar, aber: (1) Ausnahmen unvollständig (Art. 17(3)(a) und (b) fehlen, nur 'e.g.'); (2) 'soweit die Verarbeitung erforderlich ist' fehlt; (3) Frage unscharf ('our service', 'all their data': personenbezogene Daten, Rolle als Verantwortlicher), Antwort auf 'Do we have to comply?' nur indirekt."}
+{"id": "q12", "round": 3, "verdict": "ok", "reason": "Nach Korrektur (Frage präzisiert, Ausnahmen (a)-(e) ergänzt, gold_ids GDPR-17-1 und GDPR-17-3): Referenzantwort vollständig und aus den Passagen ableitbar. Prüfer-Hinweis zu 'child' in (f) danach entfernt."}
