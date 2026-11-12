@@ -161,12 +161,10 @@ class Retriever:
         if mode == "vector":
             return [Hit(self.chunks[i], s, r, cosine=s) for r, (i, s) in enumerate(vec[:k], 1)]
         fused = rrf([self.bm25_ranking(query, CANDIDATES), vec])
-        hits = []
-        for r, (i, s) in enumerate(fused[:k], 1):
-            c = cos.get(i)
-            if c is None:  # found by BM25 only: compute its cosine directly
-                c = float(self.store.matrix[self.store.ids.index(i)] @ (qvec / np.linalg.norm(qvec))) if hasattr(self.store, "matrix") else None
-            hits.append(Hit(self.chunks[i], s, r, cosine=c))
+        top = fused[:k]
+        missing = [i for i, _ in top if i not in cos]  # found by BM25 only
+        cos.update(self.store.similarity(qvec, missing))
+        hits = [Hit(self.chunks[i], s, r, cosine=cos[i]) for r, (i, s) in enumerate(top, 1)]
         return hits
 
 

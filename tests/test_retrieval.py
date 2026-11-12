@@ -34,6 +34,20 @@ def test_numpy_store_cosine_and_roundtrip(tmp_path):
     assert again.ids == ["a", "b", "c"] and again.search(np.array([1, 0, 0]), 1)[0][0] == "a"
 
 
+def test_similarity_for_given_ids():
+    store = NumpyVectorStore(["a", "b"], np.array([[1, 0], [1, 1]], dtype=np.float32))
+    sim = store.similarity(np.array([2, 0]), ["b", "a"])
+    assert abs(sim["a"] - 1.0) < 1e-6 and abs(sim["b"] - 0.7071) < 1e-3
+
+
+def test_hybrid_gives_cosine_for_bm25_only_hits():
+    r = fake_retriever()
+    # "risk management" matches c2 only via BM25; its cosine to the query vector [1,0,0] is 0
+    hits = {h.chunk.id: h for h in r.search("risk management", mode="hybrid", k=3)}
+    assert hits["c2"].cosine == pytest.approx(0.0)
+    assert all(h.cosine is not None for h in hits.values())
+
+
 def fake_retriever():
     chunks = [
         make_chunk("c1", "software classification rule class IIa"),

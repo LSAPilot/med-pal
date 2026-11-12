@@ -1,4 +1,4 @@
-"""Command line interface. Further commands (ingest, index, search, ask) follow in later sections."""
+"""Command line interface: fetch, ingest, index, search. The `ask` command follows in section 3."""
 from __future__ import annotations
 
 import argparse

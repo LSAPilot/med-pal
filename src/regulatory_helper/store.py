@@ -22,6 +22,10 @@ class VectorStore(ABC):
         """Return up to k (chunk_id, cosine similarity) pairs, best first."""
 
     @abstractmethod
+    def similarity(self, query_vec: np.ndarray, ids: list[str]) -> dict[str, float]:
+        """Cosine similarity of the query to the given chunk ids (used for hits found by BM25 only)."""
+
+    @abstractmethod
     def __len__(self) -> int: ...
 
 
@@ -31,6 +35,7 @@ class NumpyVectorStore(VectorStore):
             raise ValueError("ids and matrix rows differ")
         norms = np.linalg.norm(matrix, axis=1, keepdims=True)
         self.ids = list(ids)
+        self._row = {cid: i for i, cid in enumerate(self.ids)}
         self.matrix = (matrix / np.clip(norms, 1e-12, None)).astype(np.float32)
         self.model_name = model_name
 
@@ -45,6 +50,11 @@ class NumpyVectorStore(VectorStore):
         top = np.argpartition(-sims, k - 1)[:k]
         top = top[np.argsort(-sims[top])]
         return [(self.ids[i], float(sims[i])) for i in top]
+
+    def similarity(self, query_vec: np.ndarray, ids: list[str]) -> dict[str, float]:
+        q = np.asarray(query_vec, dtype=np.float32).reshape(-1)
+        q = q / max(float(np.linalg.norm(q)), 1e-12)
+        return {cid: float(self.matrix[self._row[cid]] @ q) for cid in ids}
 
     def save(self, directory: Path) -> None:
         directory.mkdir(parents=True, exist_ok=True)
