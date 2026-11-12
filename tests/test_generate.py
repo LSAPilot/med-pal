@@ -21,7 +21,9 @@ class FakeClient:
         self.calls.append(kw)
         text = self.replies.pop(0)
         return SimpleNamespace(
-            content=[SimpleNamespace(type="text", text=text)], usage=SimpleNamespace(input_tokens=100, output_tokens=20)
+            content=[SimpleNamespace(type="text", text=text)],
+            usage=SimpleNamespace(input_tokens=100, output_tokens=20),
+            stop_reason="end_turn",
         )
 
 
@@ -181,3 +183,13 @@ def test_empty_rewrite_falls_back_to_question():
     c = FakeClient(["  ", ans_json(["c1"])])
     a = generate.answer_question("software classification", [], "en", CFG, fake_retriever(), c)
     assert a.search_query == "software classification"
+
+
+def test_found_as_string_false_is_not_found():
+    data = generate.parse_answer_json('{"found": "false", "answer": "x", "used_ids": []}')
+    assert data["found"] is False
+
+
+def test_unknown_language_is_rejected():
+    with pytest.raises(ValueError):
+        generate.answer_question("q", lang="fr", retriever=fake_retriever(), client=FakeClient([]))

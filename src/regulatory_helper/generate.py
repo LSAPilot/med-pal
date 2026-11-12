@@ -1,11 +1,11 @@
-"""Section 3: from a question to a grounded answer.
+"""From a question to a grounded answer.
 
 Flow of `answer_question`:
   history (last N rounds) + question
-    -> Haiku: rewrite into a standalone English search query   (optional)
+    -> LLM: rewrite into a standalone English search query   (optional)
     -> retrieval (bm25 | vector | hybrid), top k
     -> best cosine below threshold?  -> "nothing found", no second LLM call
-    -> Haiku: answer as JSON {found, answer, used_ids}
+    -> LLM: answer as JSON {found, answer, used_ids}
     -> code validates every id against the retrieved hits and takes the quotes from chunks.jsonl itself
 
 The function stores nothing: the caller owns the history and passes it in.
@@ -19,9 +19,12 @@ import re
 from dataclasses import dataclass, field
 
 from .chunking import Chunk
-from .retrieval import DEFAULT_K, Retriever
+from .retrieval import DEFAULT_K, DEFAULT_MODE, Hit, Retriever
 
-log = logging.getLogger("regulatory_helper")
+log = logging.getLogger(__name__)
+
+LANGS = ("de", "en")
+LANG_NAME = {"de": "German", "en": "English"}
 
 # --------------------------------------------------------------------------
 # configuration (one place)
@@ -32,14 +35,14 @@ log = logging.getLogger("regulatory_helper")
 class Config:
     model: str = "claude-haiku-5-5"
     k: int = DEFAULT_K
-    mode: str = "hybrid"
+    mode: str = DEFAULT_MODE
     rewrite: bool = True
     max_history_turns: int = 3
-    # Minimum cosine of the best hit. Provisional: off-topic queries reach 0.44-0.64, on-topic ones 0.75+ (see docs/answer-examples.md).
+    # Minimum cosine of the best hit. Off-topic queries reach 0.44-0.64, on-topic ones 0.75+ (see docs/answer-examples.md).
     threshold: float = 0.60
     rewrite_max_tokens: int = 400
     answer_max_tokens: int = 2000
-    effort: str = "low"  # Haiku 5.5 default is "medium"; routine RAG work does not need more
+    effort: str = "low"  # Haiku 5.5 defaults to "medium"; routine RAG work does not need more
     # USD per 1M tokens (Haiku 5.5, prompts up to 100K tokens). Only used for the cost log.
     price_in: float = 0.10
     price_out: float = 0.50
@@ -97,7 +100,7 @@ class Answer:
     sources: list[Source] = field(default_factory=list)
     found: bool = True
     search_query: str = ""
-    hits: list = field(default_factory=list)  # all retrieved Hit objects (for "under the hood")
+    hits: list[Hit] = field(default_factory=list)  # all retrieved hits (for "under the hood")
     best_cosine: float | None = None
     dropped_ids: list[str] = field(default_factory=list)
     usage: Usage = field(default_factory=Usage)
@@ -127,13 +130,9 @@ def get_client():
     load_dotenv()
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("ANTHROPIC_API_KEY is not set (put it in .env, see .env.example)")
-    import anthropic
+    import anthropic  # imported lazily so retrieval-only commands work without the SDK configured
 
     return anthropic.Anthropic()
-
-
-def _text_of(resp) -> str:
-    return "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
 
 
 def _call(client, cfg: Config, usage: Usage, system: str, user: str, max_tokens: int) -> str:
@@ -145,7 +144,9 @@ def _call(client, cfg: Config, usage: Usage, system: str, user: str, max_tokens:
         output_config={"effort": cfg.effort},
     )
     usage.add(resp, cfg)
-    return _text_of(resp)
+    if resp.stop_reason not in ("end_turn", "stop_sequence"):
+        log.warning("model stopped early: stop_reason=%s", resp.stop_reason)
+    return "".join(b.text for b in resp.content if b.type == "text").strip()
 
 
 # --------------------------------------------------------------------------
@@ -177,7 +178,7 @@ def clean_query(raw: str) -> str:
     lines = [ln.strip() for ln in raw.splitlines() if ln.strip()]
     if not lines:
         return ""
-    return re.sub(r"^(search )?query:\s*", "", lines[0], flags=re.I).strip().strip('"').strip()
+    return re.sub(r"^(search )?query:\s*", "", lines[0], flags=re.IGNORECASE).strip().strip('"').strip()
 
 
 # --------------------------------------------------------------------------
@@ -197,10 +198,8 @@ If they answer it only partly, set "found" to true, state what the passages say 
 Respond with a single JSON object and nothing else:
 {"found": true|false, "answer": "<text>", "used_ids": ["<id>", ...]}"""
 
-LANG_NAME = {"de": "German", "en": "English"}
 
-
-def build_answer_prompt(question: str, hits, history: list[Turn], lang: str) -> str:
+def build_answer_prompt(question: str, hits: list[Hit], history: list[Turn], lang: str) -> str:
     passages = "\n\n".join(f"[{h.chunk.id}] {h.chunk.citation}\n{h.chunk.text}" for h in hits)
     parts = []
     if history:
@@ -210,14 +209,20 @@ def build_answer_prompt(question: str, hits, history: list[Turn], lang: str) -> 
     return "\n\n".join(parts)
 
 
+def _as_bool(value) -> bool:
+    """JSON booleans as they should be; also tolerate "false"/"true" strings some models emit."""
+    if isinstance(value, str):
+        return value.strip().lower() not in ("false", "0", "no", "")
+    return bool(value)
+
+
 def parse_answer_json(raw: str) -> dict | None:
     """Parse the model output into a dict with keys found/answer/used_ids, or None if unusable."""
-    s = raw.strip()
-    s = re.sub(r"^```(?:json)?\s*|\s*```$", "", s)
+    s = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
     try:
         data = json.loads(s)
     except json.JSONDecodeError:
-        m = re.search(r"\{.*\}", s, re.S)  # tolerate text around the object
+        m = re.search(r"\{.*\}", s, re.DOTALL)  # tolerate text around the object
         if not m:
             return None
         try:
@@ -229,10 +234,10 @@ def parse_answer_json(raw: str) -> dict | None:
     ids = data.get("used_ids", [])
     if not isinstance(ids, list):
         return None
-    return {"found": bool(data.get("found", True)), "answer": data.get("answer", ""), "used_ids": [str(i) for i in ids]}
+    return {"found": _as_bool(data.get("found", True)), "answer": data.get("answer", ""), "used_ids": [str(i) for i in ids]}
 
 
-def validate_ids(used_ids: list[str], hits) -> tuple[list[str], list[str]]:
+def validate_ids(used_ids: list[str], hits: list[Hit]) -> tuple[list[str], list[str]]:
     """Split into (valid, invalid). Valid = was among the delivered hits. Order kept, duplicates removed."""
     allowed = {h.chunk.id for h in hits}
     valid, invalid = [], []
@@ -254,14 +259,14 @@ def _source(c: Chunk) -> Source:
 # --------------------------------------------------------------------------
 
 
-def best_cosine(retriever: Retriever, query: str, hits) -> float | None:
+def best_cosine(retriever: Retriever, query: str, hits: list[Hit]) -> float | None:
     """Best cosine similarity among the hits. BM25 hits carry none, so compute it from the vector store."""
     if not hits:
         return None
     cos = [h.cosine for h in hits if h.cosine is not None]
-    if len(cos) < len(hits):
-        sims = retriever.store.similarity(retriever._embed_query(query), [h.chunk.id for h in hits if h.cosine is None])
-        cos += list(sims.values())
+    missing = [h.chunk.id for h in hits if h.cosine is None]
+    if missing:
+        cos += retriever.store.similarity(retriever.embed_query(query), missing).values()
     return max(cos)
 
 
@@ -274,6 +279,8 @@ def answer_question(
     client=None,
 ) -> Answer:
     """Answer one question. Pure function of its arguments: nothing is stored, history is passed in."""
+    if lang not in LANGS:
+        raise ValueError(f"lang must be one of {LANGS}, got {lang!r}")
     cfg = cfg or Config()
     retriever = retriever or Retriever.load()
     client = client or get_client()
@@ -285,7 +292,7 @@ def answer_question(
     best = best_cosine(retriever, query, hits)
     result = Answer(text="", search_query=query, hits=hits, best_cosine=best, usage=usage)
 
-    if not hits or best is None or best < cfg.threshold:
+    if best is None or best < cfg.threshold:
         result.text, result.found, result.reason = NOT_FOUND[lang], False, "below_threshold"
         log.info("below threshold best=%s threshold=%s tokens=%d/%d", best, cfg.threshold, usage.input_tokens, usage.output_tokens)
         return result
@@ -301,14 +308,14 @@ def answer_question(
     if invalid:
         log.warning("dropped ids not among the retrieved hits: %s", invalid)
     result.dropped_ids = invalid
-    if not data["found"] or not data["answer"].strip():
-        result.text, result.found, result.reason = NOT_FOUND[lang], False, "model_no_answer"
-    elif not valid:
+    answer = data["answer"].strip()
+    if not data["found"] or not answer or not valid:
         # An answer without a single verifiable source is not shown (no unsupported claims).
+        if data["found"] and answer:
+            log.warning("answer without valid source ids rejected")
         result.text, result.found, result.reason = NOT_FOUND[lang], False, "model_no_answer"
-        log.warning("answer without valid source ids rejected")
     else:
-        result.text = data["answer"].strip()
+        result.text = answer
         result.sources = [_source(retriever.chunks[i]) for i in valid]
     log.info(
         "answered found=%s reason=%s calls=%d tokens=%d/%d cost=$%.5f",

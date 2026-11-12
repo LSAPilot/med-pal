@@ -28,7 +28,7 @@ chunks = read_chunks()
 texts = [retrieval.doc_text(c) for c in chunks]
 ids = [c.id for c in chunks]
 for name, prefix in CANDIDATES:
-    retrieval._model = None
+    retrieval.get_model.cache_clear()  # free the previous model
     t0 = time.time()
     model = retrieval.get_model(name)
     mx = model.max_seq_length
