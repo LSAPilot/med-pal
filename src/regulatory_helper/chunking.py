@@ -15,7 +15,7 @@ Chunk kinds
 Chunks longer than MAX_CHARS are split into parts "<id>-s1", "<id>-s2", ...
 
 IDs: "<LAW>-<article>-<paragraph>" (e.g. MDR-10-9), "<LAW>-REC-<n>", "<LAW>-ANNEX-<numeral>-<point>"
-("intro" for text before the first heading, "n<k>" for unnumbered sections). Details: docs/chunking.md.
+("intro" for text before the first heading, "n<k>" for unnumbered sections).
 """
 from __future__ import annotations
 

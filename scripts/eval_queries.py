@@ -2,7 +2,7 @@
 
 A hit counts if the chunk ID equals a gold ID or starts with it followed by '-' or '.'
 (so "GDPR-9" covers GDPR-9-1, GDPR-9-2, ... and "MDR-ANNEX-I-17" covers its sub points).
-This set is only for choosing the embedding model and for the examples in docs/search-examples.md.
+This set is only for choosing the embedding model (scripts/compare_models.py) and the search metrics.
 It is NOT the validation set of section 5.
 """
 

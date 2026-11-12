@@ -1,14 +1,14 @@
 # Evaluation: does RAG help?
 
-Experiment from section 5b (design: see the questions and method below). 30 questions (`eval/questions.jsonl`: 22 answerable, 5 without answer in the sources, 1 follow-up session with 3 turns; German and English). Three systems answered every question in the same setup (same answer instruction, effort `low`, `max_tokens` 2000, follow-ups with the system's own earlier answers as history):
+30 questions ([`questions.jsonl`](questions.jsonl): 22 answerable, 5 without answer in the sources, 1 follow-up session with 3 turns; German and English). Three systems answered every question in the same setup (same answer instruction, effort `low`, `max_tokens` 2000, follow-ups with the system's own earlier answers as history):
 
 1. **RAG**: our system (`answer_question`: query rewriting, hybrid search, threshold, Haiku with JSON, ID check),
 2. **Haiku without RAG** (`claude-haiku-5-5`),
 3. **Sonnet without RAG** (`claude-sonnet-5-5`).
 
-A judge (Claude subagent with fresh context, no API) rated the answers blind: answers appeared as A/B/C in random order per question, system names were hidden. Everything is reproducible from `eval/` (`scripts/run_eval.py`, `scripts/judge_packet.py`, `scripts/build_evaluation.py`).
+A judge (Claude subagent with fresh context, no API) rated the answers blind: answers appeared as A/B/C in random order per question, system names were hidden. Everything is reproducible from this folder (`scripts/run_eval.py`, `scripts/judge_packet.py`, `scripts/build_evaluation.py`); more charts in [`plots/`](plots/).
 
-![Correctness per system](eval-correctness.png)
+![Correctness per system](plots/eval-correctness.png)
 
 ## Answer quality
 
@@ -35,7 +35,7 @@ Hit@6 and MRR on the 25 questions that have gold chunks (22 answerable + 3 follo
 | vector | 0.80 | 0.669 |
 | hybrid | 0.92 | 0.742 |
 
-![Search per mode](eval-search.png)
+![Search per mode](plots/eval-search.png)
 
 ## Cost
 
@@ -46,7 +46,7 @@ Hit@6 and MRR on the 25 questions that have gold chunks (22 answerable + 3 follo
 | Sonnet, no RAG | claude-sonnet-5-5 | 7409 | 11719 | 0.198 | 0.0066 |
 | **Total** | | | | **0.218** | |
 
-**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: `eval/cost-estimate.md`.
+**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: [`cost-estimate.md`](cost-estimate.md).
 
 ## Threshold for "nothing found" (proposal, not applied)
 

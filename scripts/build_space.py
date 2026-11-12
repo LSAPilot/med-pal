@@ -4,7 +4,7 @@
     (or set the environment variable SPACE_DIR instead of --space-dir)
 
 Development happens only in this repo. This script fills the Space clone; it never runs git there
-(commit and push are done by hand after review, see docs/deployment.md).
+(commit and push are done by hand after review).
 
 What goes in:        app.py, LICENSE, src/regulatory_helper/*.py, requirements.txt (resolved with uv pip compile), data/processed/{index files}, data/examples.json,
                      README.md (YAML header of the Space is kept untouched, only the text below it is replaced)

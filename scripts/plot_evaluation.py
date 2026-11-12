@@ -1,7 +1,7 @@
 """Plot the RAG vs. no-RAG evaluation from eval/ into eval/plots/ (no API, deterministic).
 
 Usage: uv run python scripts/plot_evaluation.py
-Complements scripts/build_evaluation.py (which writes the two charts embedded in docs/evaluation.md).
+Complements scripts/build_evaluation.py (which writes eval/README.md and the two charts embedded there).
 """
 import json
 from collections import Counter

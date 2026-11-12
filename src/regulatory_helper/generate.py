@@ -38,7 +38,7 @@ class Config:
     mode: str = DEFAULT_MODE
     rewrite: bool = True
     max_history_turns: int = 3
-    # Minimum cosine of the best hit. Off-topic queries reach 0.44-0.64, on-topic ones 0.75+ (see docs/answer-examples.md).
+    # Minimum cosine of the best hit. Off-topic queries reach 0.44-0.64, on-topic ones 0.75+ (see eval/README.md).
     threshold: float = 0.60
     rewrite_max_tokens: int = 400
     answer_max_tokens: int = 2000

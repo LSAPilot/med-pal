@@ -1,4 +1,4 @@
-"""Build docs/evaluation.md and the PNG charts from eval/ (no API, deterministic).
+"""Build eval/README.md and its two charts (eval/plots/) from the data in eval/ (no API, deterministic).
 
 Usage: uv run python scripts/build_evaluation.py
 Needs eval/judgements-resolved.jsonl (scripts/judge_packet.py resolve). Hand-written examples live in eval/examples.md.
@@ -102,7 +102,7 @@ def charts():
     ax.set_title(f"Correctness on {len(has_answer)} answerable questions", fontsize=10)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
-    fig.savefig(ROOT / "docs/eval-correctness.png", dpi=160)
+    fig.savefig(EVAL / "plots/eval-correctness.png", dpi=160)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(6, 3.6))
@@ -119,7 +119,7 @@ def charts():
     ax.legend(frameon=False, loc="lower right")
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
-    fig.savefig(ROOT / "docs/eval-search.png", dpi=160)
+    fig.savefig(EVAL / "plots/eval-search.png", dpi=160)
     plt.close(fig)
 
 
@@ -135,15 +135,15 @@ thr_text = (EVAL / "threshold-note.md").read_text(encoding="utf-8") if (EVAL / "
 
 doc = f"""# Evaluation: does RAG help?
 
-Experiment from section 5b (design: see the questions and method below). 30 questions (`eval/questions.jsonl`: 22 answerable, 5 without answer in the sources, 1 follow-up session with 3 turns; German and English). Three systems answered every question in the same setup (same answer instruction, effort `low`, `max_tokens` 2000, follow-ups with the system's own earlier answers as history):
+30 questions ([`questions.jsonl`](questions.jsonl): 22 answerable, 5 without answer in the sources, 1 follow-up session with 3 turns; German and English). Three systems answered every question in the same setup (same answer instruction, effort `low`, `max_tokens` 2000, follow-ups with the system's own earlier answers as history):
 
 1. **RAG**: our system (`answer_question`: query rewriting, hybrid search, threshold, Haiku with JSON, ID check),
 2. **Haiku without RAG** (`claude-haiku-5-5`),
 3. **Sonnet without RAG** (`claude-sonnet-5-5`).
 
-A judge (Claude subagent with fresh context, no API) rated the answers blind: answers appeared as A/B/C in random order per question, system names were hidden. Everything is reproducible from `eval/` (`scripts/run_eval.py`, `scripts/judge_packet.py`, `scripts/build_evaluation.py`).
+A judge (Claude subagent with fresh context, no API) rated the answers blind: answers appeared as A/B/C in random order per question, system names were hidden. Everything is reproducible from this folder (`scripts/run_eval.py`, `scripts/judge_packet.py`, `scripts/build_evaluation.py`); more charts in [`plots/`](plots/).
 
-![Correctness per system](eval-correctness.png)
+![Correctness per system](plots/eval-correctness.png)
 
 ## Answer quality
 
@@ -157,13 +157,13 @@ Hit@6 and MRR on the {sm['n']} questions that have gold chunks (22 answerable + 
 
 {search_tbl}
 
-![Search per mode](eval-search.png)
+![Search per mode](plots/eval-search.png)
 
 ## Cost
 
 {cost_tbl}
 
-**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: `eval/cost-estimate.md`.
+**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: [`cost-estimate.md`](cost-estimate.md).
 
 ## Threshold for "nothing found" (proposal, not applied)
 
@@ -182,5 +182,5 @@ Hit@6 and MRR on the {sm['n']} questions that have gold chunks (22 answerable + 
 - The judge's grounding score for the no-RAG systems is relative to the supplied source text, not to the full law. The Sonnet price is an assumption (see Cost).
 - The threshold was calibrated on the same 30 questions it is evaluated on (see above).
 """
-(ROOT / "docs/evaluation.md").write_text(doc, encoding="utf-8")
+(EVAL / "README.md").write_text(doc, encoding="utf-8")
 print("written", total, "threshold mid", mid, "gap", round(gap, 3))

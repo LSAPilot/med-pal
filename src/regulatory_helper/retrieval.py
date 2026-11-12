@@ -26,7 +26,8 @@ PROCESSED = OUT_PATH.parent
 MODES = ("bm25", "vector", "hybrid")
 DEFAULT_MODE = "hybrid"
 DEFAULT_K = 6
-MODEL_NAME = "BAAI/bge-small-en-v1.5"  # choice explained in docs/embedding-model.md
+# bge-small: full 512-token input (MiniLM cuts at 256), hit@6 1.00 like bge-base at 1/4 to 1/3 of the compute.
+MODEL_NAME = "BAAI/bge-small-en-v1.5"
 # bge models expect this prefix on queries (not on documents) for retrieval
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 RRF_K = 60  # standard constant of Reciprocal Rank Fusion

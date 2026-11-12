@@ -27,7 +27,17 @@ Question          follow-up? -> rewrite into a standalone English search query (
                   -> citations and quotes are taken from our own chunk data, never from model output
 ```
 The last two steps mean the model cannot invent a citation: the quoted text always comes from the stored legal text.
-Details: [`docs/chunking.md`](docs/chunking.md), [`docs/embedding-model.md`](docs/embedding-model.md), [`docs/deployment.md`](docs/deployment.md).
+
+## Design decisions
+- **Source data:** official XHTML from the EU Publications Office (Cellar API); eur-lex.europa.eu itself answers automated requests
+  with an empty HTTP 202. The consolidated MDR has no recitals, so they come from the original 2017 act and are marked as such.
+- **Chunks:** one per article paragraph, annex point or recital (definitions: one per term), at most 2000 characters,
+  with stable IDs such as `MDR-10-9` or `MDR-ANNEX-VIII-6.3`. Citation and title are indexed with the text.
+- **Embedding model:** `bge-small-en-v1.5` on CPU. On 16 test queries it found every target chunk in the top 6 like `bge-base`,
+  at a quarter to a third of the compute; `all-MiniLM-L6-v2` cuts input at 256 tokens and missed 3 of 16.
+- **Budget protection:** per-visitor and daily limits, an answer cache and precomputed example answers, all in memory and
+  configurable via environment variables (see `.env.example`). A reached limit never calls the API.
+- **Privacy:** question texts and addresses are never logged or stored; logs contain only counters, tokens and cost.
 
 ## Validation results
 30 questions (22 answerable, 5 without answer in the sources, 1 follow-up session), German and English.
@@ -40,14 +50,14 @@ The RAG system (Haiku + search) was compared with Haiku and Sonnet **without** R
 | Questions without answer in the sources (5) | **5 correctly refused** | 3 hallucinated | 3 hallucinated |
 | Cost per question (USD) | 0.0005 | 0.0002 | 0.0066 (assumed price) |
 
-![Correctness per system](docs/eval-correctness.png)
+![Correctness per system](eval/plots/eval-correctness.png)
 
 **Takeaway, honestly:** Sonnet without RAG is more often correct (1.92 vs. 1.64), so the hypothesis "a small model with RAG beats a bigger one"
 holds only in part. RAG wins on grounding, refuses correctly when the sources contain no answer (the other systems answered
 confidently anyway), and costs a fraction. The two RAG errors came from search misses on "when / how much" questions, not from the model.
 
 **Limits:** only 30 questions (one question moves a score by 3-4 points), Claude generated the questions and judged the answers,
-no legal experts took part, the Sonnet price is an assumption. Full method, search metrics, cost and limits: [`docs/evaluation.md`](docs/evaluation.md).
+no legal experts took part, the Sonnet price is an assumption. Full method, search metrics, cost and limits: [`eval/README.md`](eval/README.md).
 
 ## Sources and license
 - **Code:** MIT, see [`LICENSE`](LICENSE).
@@ -66,7 +76,7 @@ no legal experts took part, the Sonnet price is an assumption. Full method, sear
 ```bash
 uv sync
 uv run regulatory-helper fetch     # downloads raw files into data/raw/ (+ manifest.json with hashes)
-uv run regulatory-helper ingest    # splits them into data/processed/chunks.jsonl (see docs/chunking.md)
+uv run regulatory-helper ingest    # splits them into data/processed/chunks.jsonl
 uv run regulatory-helper index     # embeddings + BM25 index (downloads the embedding model once, a few minutes on CPU)
 uv run regulatory-helper search "Rule 11 software classification" --mode hybrid   # bm25 | vector | hybrid, --k 6
 uv run regulatory-helper ask "Ist meine App ein Medizinprodukt?" --lang de [--mode hybrid] [--no-rewrite] [--verbose]
@@ -84,14 +94,6 @@ app.py                   entry point for the app and the Space
 scripts/                 evaluation runs, reports, Space sync (build_space.py)
 data/raw/                original EUR-Lex files + manifest with hashes
 data/processed/          chunks and search index (generated)
-eval/                    questions, answers, blind judgements, search metrics
-docs/                    documentation (below)
+eval/                    validation: questions, answers, blind judgements, search metrics, report (eval/README.md)
 tests/                   pytest suite (API mocked)
 ```
-
-## Docs
-- [`docs/evaluation.md`](docs/evaluation.md): validation, search metrics, cost, threshold proposal, limits
-- [`docs/data-format.md`](docs/data-format.md): source formats
-- [`docs/chunking.md`](docs/chunking.md): chunk fields, ID scheme, statistics
-- [`docs/embedding-model.md`](docs/embedding-model.md), [`docs/search-examples.md`](docs/search-examples.md), [`docs/answer-examples.md`](docs/answer-examples.md): model choice, real search results and answers, threshold calibration
-- [`docs/deployment.md`](docs/deployment.md): limits, privacy, ZeroGPU, deployment steps
