@@ -1,10 +1,12 @@
 # Regulatory Copilot
 
 RAG system for regulatory questions about medical device software. You ask a question
-(German or English) and get an answer based **only** on the original legal texts, with
-every statement backed by a source (e.g. "MDR Art. 10(9)") and the original quote.
+(German or English) and get an answer based **only** on the original legal texts (MDR, GDPR, AI Act),
+with every statement backed by a source (e.g. "MDR Art. 10(9)") and the original quote.
 
-> **Status:** work in progress. Sections 1a to 4 done (setup, raw data, chunking, search, answering, Gradio app and Space sync). Validation (section 5) follows. Not deployed yet, see `docs/deployment.md`.
+**Live demo:** https://huggingface.co/spaces/LSAPilot/medical-app-regulatory-helper
+
+> **Status:** MVP live on Hugging Face Spaces; validation against Haiku and Sonnet without RAG done (see [Results](#validation-results)).
 
 ## Important notices
 - **Not legal advice.** This is a research/portfolio tool. Do not rely on it for compliance decisions.
@@ -12,11 +14,47 @@ every statement backed by a source (e.g. "MDR Art. 10(9)") and the original quot
   The knowledge base covers only the freely available EU texts below.
 - Questions are not stored.
 
-## Sources
-All texts come from [EUR-Lex](https://eur-lex.europa.eu/) / the EU Publications Office (Cellar API),
-English versions. Reuse is permitted under Commission Decision 2011/833/EU with attribution.
-The consolidated MDR text is documentation only and has no legal effect; the authentic texts are
-those in the Official Journal. Text may be restructured (split into paragraphs) by this project.
+## How it works
+```
+Indexing (once)   EUR-Lex XHTML -> chunks (article paragraphs, annexes, recitals, stable IDs)
+                  -> BM25 index + embeddings (bge-small-en-v1.5)
+
+Question          follow-up? -> rewrite into a standalone English search query (uses the last 3 rounds)
+                  -> hybrid search: BM25 + vector, merged by Reciprocal Rank Fusion (RRF)
+                  -> similarity threshold: if the best hit is too weak, answer "not in the sources" without calling the LLM
+                  -> Claude Haiku answers from the passages only and returns JSON (answer + cited chunk IDs)
+                  -> ID check: every cited ID must be one of the retrieved passages, otherwise it is dropped
+                  -> citations and quotes are taken from our own chunk data, never from model output
+```
+The last two steps mean the model cannot invent a citation: the quoted text always comes from the stored legal text.
+Details: [`docs/chunking.md`](docs/chunking.md), [`docs/embedding-model.md`](docs/embedding-model.md), [`docs/deployment.md`](docs/deployment.md).
+
+## Validation results
+30 questions (22 answerable, 5 without answer in the sources, 1 follow-up session), German and English.
+The RAG system (Haiku + search) was compared with Haiku and Sonnet **without** RAG in the same setup and rated by a blind judge.
+
+| Metric | RAG (Haiku) | Haiku, no RAG | Sonnet, no RAG |
+|---|---|---|---|
+| Correctness, 0-2 (25 answerable) | 1.64 | 1.52 | **1.92** |
+| Grounding in the source text, 0-2 | **1.84** | 1.36 | 1.48 |
+| Questions without answer in the sources (5) | **5 correctly refused** | 3 hallucinated | 3 hallucinated |
+| Cost per question (USD) | 0.0005 | 0.0002 | 0.0066 (assumed price) |
+
+![Correctness per system](docs/eval-correctness.png)
+
+**Takeaway, honestly:** Sonnet without RAG is more often correct (1.92 vs. 1.64), so the hypothesis "a small model with RAG beats a bigger one"
+holds only in part. RAG wins on grounding, refuses correctly when the sources contain no answer (the other systems answered
+confidently anyway), and costs a fraction. The two RAG errors came from search misses on "when / how much" questions, not from the model.
+
+**Limits:** only 30 questions (one question moves a score by 3-4 points), Claude generated the questions and judged the answers,
+no legal experts took part, the Sonnet price is an assumption. Full method, search metrics, cost and limits: [`docs/evaluation.md`](docs/evaluation.md).
+
+## Sources and license
+- **Code:** MIT, see [`LICENSE`](LICENSE).
+- **Legal texts** (`data/raw/`) are **not** under MIT. They come from [EUR-Lex](https://eur-lex.europa.eu/) / the EU Publications Office (Cellar API),
+  English versions. Reuse is permitted under Commission Decision 2011/833/EU with attribution.
+  The consolidated MDR text is documentation only and has no legal effect; the authentic texts are
+  those in the Official Journal. Text may be restructured (split into paragraphs) by this project.
 
 | Law | CELEX |
 |---|---|
@@ -34,10 +72,26 @@ uv run regulatory-helper search "Rule 11 software classification" --mode hybrid 
 uv run regulatory-helper ask "Ist meine App ein Medizinprodukt?" --lang de [--mode hybrid] [--no-rewrite] [--verbose]
 uv run regulatory-helper chat --lang de   # session with follow-up questions (last 3 rounds, kept only in memory)
 uv run python app.py                      # Gradio app at http://127.0.0.1:7860 (also: regulatory-helper serve)
-uv run python scripts/build_space.py      # copy what the Hugging Face Space needs into its clone (no git commands)
+uv run python scripts/build_space.py --space-dir <space-clone>   # copy what the Hugging Face Space needs into its clone (or set SPACE_DIR; no git commands)
 uv run pytest                             # API is mocked in tests, no cost
 ```
 Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (needed for `ask`/`chat`, never commit it).
 
-## Layout
-See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics), `docs/embedding-model.md` and `docs/search-examples.md` and `docs/answer-examples.md` (real answers, threshold calibration). `docs/deployment.md` (limits, privacy, ZeroGPU, manual deployment steps). Code lives in `src/regulatory_helper/`.
+## Project structure
+```
+src/regulatory_helper/   fetch, chunking, retrieval (BM25 + vector + RRF), generate (rewrite, answer, ID check), service + limits, Gradio UI, CLI
+app.py                   entry point for the app and the Space
+scripts/                 evaluation runs, reports, Space sync (build_space.py)
+data/raw/                original EUR-Lex files + manifest with hashes
+data/processed/          chunks and search index (generated)
+eval/                    questions, answers, blind judgements, search metrics
+docs/                    documentation (below)
+tests/                   pytest suite (API mocked)
+```
+
+## Docs
+- [`docs/evaluation.md`](docs/evaluation.md): validation, search metrics, cost, threshold proposal, limits
+- [`docs/data-format.md`](docs/data-format.md): source formats
+- [`docs/chunking.md`](docs/chunking.md): chunk fields, ID scheme, statistics
+- [`docs/embedding-model.md`](docs/embedding-model.md), [`docs/search-examples.md`](docs/search-examples.md), [`docs/answer-examples.md`](docs/answer-examples.md): model choice, real search results and answers, threshold calibration
+- [`docs/deployment.md`](docs/deployment.md): limits, privacy, ZeroGPU, deployment steps
