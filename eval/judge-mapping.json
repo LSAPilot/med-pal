@@ -1,0 +1,152 @@
+{
+ "q01": {
+  "A": "sonnet-no-rag",
+  "B": "rag",
+  "C": "haiku-no-rag"
+ },
+ "q02": {
+  "A": "haiku-no-rag",
+  "B": "sonnet-no-rag",
+  "C": "rag"
+ },
+ "q03": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q04": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q05": {
+  "A": "rag",
+  "B": "haiku-no-rag",
+  "C": "sonnet-no-rag"
+ },
+ "q06": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q07": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q08": {
+  "A": "sonnet-no-rag",
+  "B": "rag",
+  "C": "haiku-no-rag"
+ },
+ "q09": {
+  "A": "haiku-no-rag",
+  "B": "rag",
+  "C": "sonnet-no-rag"
+ },
+ "q10": {
+  "A": "rag",
+  "B": "sonnet-no-rag",
+  "C": "haiku-no-rag"
+ },
+ "q11": {
+  "A": "rag",
+  "B": "haiku-no-rag",
+  "C": "sonnet-no-rag"
+ },
+ "q12": {
+  "A": "haiku-no-rag",
+  "B": "sonnet-no-rag",
+  "C": "rag"
+ },
+ "q13": {
+  "A": "sonnet-no-rag",
+  "B": "rag",
+  "C": "haiku-no-rag"
+ },
+ "q14": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q15": {
+  "A": "rag",
+  "B": "haiku-no-rag",
+  "C": "sonnet-no-rag"
+ },
+ "q16": {
+  "A": "haiku-no-rag",
+  "B": "rag",
+  "C": "sonnet-no-rag"
+ },
+ "q17": {
+  "A": "sonnet-no-rag",
+  "B": "rag",
+  "C": "haiku-no-rag"
+ },
+ "q18": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q19": {
+  "A": "haiku-no-rag",
+  "B": "rag",
+  "C": "sonnet-no-rag"
+ },
+ "q20": {
+  "A": "rag",
+  "B": "sonnet-no-rag",
+  "C": "haiku-no-rag"
+ },
+ "q21": {
+  "A": "rag",
+  "B": "sonnet-no-rag",
+  "C": "haiku-no-rag"
+ },
+ "q22": {
+  "A": "rag",
+  "B": "sonnet-no-rag",
+  "C": "haiku-no-rag"
+ },
+ "q23": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q24": {
+  "A": "sonnet-no-rag",
+  "B": "rag",
+  "C": "haiku-no-rag"
+ },
+ "q25": {
+  "A": "haiku-no-rag",
+  "B": "rag",
+  "C": "sonnet-no-rag"
+ },
+ "q26": {
+  "A": "rag",
+  "B": "haiku-no-rag",
+  "C": "sonnet-no-rag"
+ },
+ "q27": {
+  "A": "rag",
+  "B": "sonnet-no-rag",
+  "C": "haiku-no-rag"
+ },
+ "q28": {
+  "A": "haiku-no-rag",
+  "B": "rag",
+  "C": "sonnet-no-rag"
+ },
+ "q29": {
+  "A": "sonnet-no-rag",
+  "B": "haiku-no-rag",
+  "C": "rag"
+ },
+ "q30": {
+  "A": "rag",
+  "B": "sonnet-no-rag",
+  "C": "haiku-no-rag"
+ }
+}
