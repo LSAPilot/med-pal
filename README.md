@@ -4,7 +4,7 @@ RAG system for regulatory questions about medical device software. You ask a que
 (German or English) and get an answer based **only** on the original legal texts, with
 every statement backed by a source (e.g. "MDR Art. 10(9)") and the original quote.
 
-> **Status:** work in progress. Sections 1a, 1b, 2 and 3 done (setup, raw data, chunking, search, answering via CLI). No web interface yet.
+> **Status:** work in progress. Sections 1a to 4 done (setup, raw data, chunking, search, answering, Gradio app and Space sync). Validation (section 5) follows. Not deployed yet, see `docs/deployment.md`.
 
 ## Important notices
 - **Not legal advice.** This is a research/portfolio tool. Do not rely on it for compliance decisions.
@@ -33,9 +33,11 @@ uv run regulatory-helper index     # embeddings + BM25 index (downloads the embe
 uv run regulatory-helper search "Rule 11 software classification" --mode hybrid   # bm25 | vector | hybrid, --k 6
 uv run regulatory-helper ask "Ist meine App ein Medizinprodukt?" --lang de [--mode hybrid] [--no-rewrite] [--verbose]
 uv run regulatory-helper chat --lang de   # session with follow-up questions (last 3 rounds, kept only in memory)
+uv run python app.py                      # Gradio app at http://127.0.0.1:7860 (also: regulatory-helper serve)
+uv run python scripts/build_space.py      # copy what the Hugging Face Space needs into its clone (no git commands)
 uv run pytest                             # API is mocked in tests, no cost
 ```
 Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (needed for `ask`/`chat`, never commit it).
 
 ## Layout
-See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics), `docs/embedding-model.md` and `docs/search-examples.md` and `docs/answer-examples.md` (real answers, threshold calibration). Code lives in `src/regulatory_helper/`.
+See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics), `docs/embedding-model.md` and `docs/search-examples.md` and `docs/answer-examples.md` (real answers, threshold calibration). `docs/deployment.md` (limits, privacy, ZeroGPU, manual deployment steps). Code lives in `src/regulatory_helper/`.
