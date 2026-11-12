@@ -1,8 +1,8 @@
 # Deployment (section 4)
 
 Two repos, one direction: development happens only in `med-pal`; the Space clone
-`/home/lorenz/medical-app-regulatory-helper` (remote `git@hf.co:spaces/LSAPilot/medical-app-regulatory-helper`) is filled by a script.
-Nothing in this document has been pushed or published yet.
+`<space-clone>` (a local clone of the Space repo, remote `git@hf.co:spaces/LSAPilot/medical-app-regulatory-helper`) is filled by a script.
+Pass the clone's path with `--space-dir <space-clone>` or the environment variable `SPACE_DIR`.
 
 ## How the app is built
 ```
@@ -56,13 +56,13 @@ The Space runs on ZeroGPU hardware. The app needs no GPU.
    ```
 2. **Sync into the Space clone** (writes files, runs no git command):
    ```bash
-   uv run python scripts/build_space.py --dry-run   # list what would be copied
-   uv run python scripts/build_space.py
+   uv run python scripts/build_space.py --space-dir <space-clone> --dry-run   # list what would be copied
+   uv run python scripts/build_space.py --space-dir <space-clone>
    ```
    The script refuses to run if the index hash does not match `chunks.jsonl`, if the example sources do not match `chunks.jsonl`, if the Space README lost its YAML header, or if `sdk_version` differs from the pinned Gradio version.
 3. **Check the Space clone:**
    ```bash
-   cd /home/lorenz/medical-app-regulatory-helper && git status && git diff README.md
+   cd <space-clone> && git status && git diff README.md
    ```
    Expected new files: `app.py`, `.gitignore`, `requirements.txt`, `src/`, `data/` (no `data/raw`, no tests, no `.env`). The README diff must only touch the text below the YAML header.
 4. **Check Git LFS before `git add`.** The Space's `.gitattributes` sends `*.npy` through LFS; without it Hugging Face rejects the binary `embeddings.npy` (~4 MB). Git LFS 3.8.1 is installed on this machine (binary in `~/.local/bin/git-lfs`, set up with `git lfs install`). Verify in the Space clone:
@@ -75,7 +75,7 @@ The Space runs on ZeroGPU hardware. The app needs no GPU.
 5. **Set the secret before the first start:** Space page -> Settings -> *Variables and secrets* -> **New secret** `ANTHROPIC_API_KEY` (a secret, not a variable, not a file). Optional *variables*: `DAILY_LIMIT`, `VISITOR_LIMIT`.
 6. **Commit and push by hand:**
    ```bash
-   cd /home/lorenz/medical-app-regulatory-helper
+   cd <space-clone>
    git add -A && git commit -m "feat: deploy regulatory copilot" && git push
    ```
 7. **Watch the build:** Space page -> *Logs* (Build, then Container). Look for the `torch==2.13.0` install and `Running on local URL`. In the container log each question shows up as `request outcome=... tokens=... cost=...` without question text.

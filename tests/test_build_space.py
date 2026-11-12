@@ -88,3 +88,20 @@ def test_sync_copies_only_allowed_files(tmp_path):
     assert top == {".git", "README.md", "app.py", "src", "data", "requirements.txt", ".gitignore"}
     assert {p.name for p in (tmp_path / "data").iterdir()} == {"processed", "examples.json"}
     assert (tmp_path / "README.md").read_text().startswith(HEAD)
+
+
+def test_missing_space_dir_stops_with_clear_message(monkeypatch):
+    import os
+    env = {k: v for k, v in os.environ.items() if k != "SPACE_DIR"}
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_space.py"), "--dry-run"],
+                       capture_output=True, text=True, cwd=ROOT, env=env)
+    assert r.returncode != 0 and "SPACE_DIR" in r.stderr and "--space-dir" in r.stderr
+
+
+def test_space_dir_from_environment(tmp_path):
+    import os
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "README.md").write_text(HEAD + "body\n")
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_space.py"), "--dry-run"],
+                       capture_output=True, text=True, cwd=ROOT, env={**os.environ, "SPACE_DIR": str(tmp_path)})
+    assert r.returncode == 0, r.stderr

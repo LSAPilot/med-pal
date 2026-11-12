@@ -1,6 +1,7 @@
 """Copy exactly what the Hugging Face Space needs into the Space clone (section 4).
 
-    uv run python scripts/build_space.py [--space-dir DIR] [--dry-run]
+    uv run python scripts/build_space.py --space-dir <space-clone> [--dry-run]
+    (or set the environment variable SPACE_DIR instead of --space-dir)
 
 Development happens only in this repo. This script fills the Space clone; it never runs git there
 (commit and push are done by hand after review, see docs/deployment.md).
@@ -14,6 +15,7 @@ Safety checks:       requirements resolve together with the Hugging Face package
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -27,7 +29,6 @@ from regulatory_helper import retrieval  # noqa: E402
 from regulatory_helper.chunking import read_chunks  # noqa: E402
 from regulatory_helper.service import load_examples  # noqa: E402
 
-DEFAULT_SPACE = Path("/home/lorenz/medical-app-regulatory-helper")
 INDEX_FILES = ["chunks.jsonl", "embeddings.npy", "ids.json", "bm25.json", "index_meta.json"]
 FORBIDDEN = ["data/raw", "tests", "scripts", "docs", ".env", ".venv", "uv.lock", "pyproject.toml"]
 # ZeroGPU only accepts specific torch versions in the Space's requirements.txt (list shown in the build error, as of 2026-11-12:
@@ -163,7 +164,7 @@ def space_readme(current: str) -> str:
         die(f"sdk_version in the Space README ({sdk and sdk.group(1)}) differs from the pinned gradio {pinned_gradio()}")
     code = (ROOT / "README.md").read_text()
     sections = []
-    for title in ("Important notices", "Sources"):
+    for title in ("Important notices", "Sources and license"):
         sm = re.search(rf"^## {title}\n.*?(?=^## |\Z)", code, re.S | re.M)
         if sm:
             sections.append(sm.group(0).strip())
@@ -217,10 +218,13 @@ def copy_tree(space: Path, dry: bool) -> list[str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--space-dir", type=Path, default=DEFAULT_SPACE)
+    ap.add_argument("--space-dir", type=Path, default=None, help="clone of the Hugging Face Space (default: environment variable SPACE_DIR)")
     ap.add_argument("--dry-run", action="store_true", help="check and list, write nothing")
     a = ap.parse_args()
-    space = a.space_dir.resolve()
+    space_arg = a.space_dir or (Path(os.environ["SPACE_DIR"]) if os.environ.get("SPACE_DIR") else None)
+    if space_arg is None:
+        die("no Space clone given. Pass --space-dir <path> or set the environment variable SPACE_DIR.")
+    space = space_arg.expanduser().resolve()
     if space == ROOT:
         die("space-dir is the code repo itself")
     if not (space / ".git").exists() or not (space / "README.md").exists():
