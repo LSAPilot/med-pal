@@ -4,7 +4,7 @@ RAG system for regulatory questions about medical device software. You ask a que
 (German or English) and get an answer based **only** on the original legal texts, with
 every statement backed by a source (e.g. "MDR Art. 10(9)") and the original quote.
 
-> **Status:** work in progress. Sections 1a and 1b done (setup, raw data download, chunking). No search or answering yet.
+> **Status:** work in progress. Sections 1a, 1b and 2 done (setup, raw data, chunking, search). No LLM answering yet.
 
 ## Important notices
 - **Not legal advice.** This is a research/portfolio tool. Do not rely on it for compliance decisions.
@@ -29,9 +29,11 @@ those in the Official Journal. Text may be restructured (split into paragraphs) 
 uv sync
 uv run regulatory-helper fetch     # downloads raw files into data/raw/ (+ manifest.json with hashes)
 uv run regulatory-helper ingest    # splits them into data/processed/chunks.jsonl (see docs/chunking.md)
+uv run regulatory-helper index     # embeddings + BM25 index (downloads the embedding model once, a few minutes on CPU)
+uv run regulatory-helper search "Rule 11 software classification" --mode hybrid   # bm25 | vector | hybrid, --k 6
 uv run pytest
 ```
 Copy `.env.example` to `.env` for the API key (needed from section 3 on, never commit it).
 
 ## Layout
-See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics). Code lives in `src/regulatory_helper/`.
+See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics), `docs/embedding-model.md` and `docs/search-examples.md`. Code lives in `src/regulatory_helper/`.
