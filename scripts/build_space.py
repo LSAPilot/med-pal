@@ -5,10 +5,10 @@
 Development happens only in this repo. This script fills the Space clone; it never runs git there
 (commit and push are done by hand after review, see docs/deployment.md).
 
-What goes in:        app.py, src/regulatory_helper/*.py, requirements.txt, data/processed/{index files}, data/examples.json,
+What goes in:        app.py, src/regulatory_helper/*.py, requirements.txt (resolved with uv pip compile), data/processed/{index files}, data/examples.json,
                      README.md (YAML header of the Space is kept untouched, only the text below it is replaced)
 What stays out:      data/raw/, tests/, scripts/, docs/, .env, .venv, caches
-Safety checks:       index hash matches chunks.jsonl, example sources match chunks.jsonl, Space README header is intact
+Safety checks:       requirements resolve together with the Hugging Face packages, index hash matches chunks.jsonl, example sources match chunks.jsonl, Space README header is intact
                      and its sdk_version equals the Gradio version pinned in pyproject.toml.
 """
 from __future__ import annotations
@@ -34,6 +34,14 @@ FORBIDDEN = ["data/raw", "tests", "scripts", "docs", ".env", ".venv", "uv.lock",
 # 2.13.0, 2.12.1, 2.11.0, 2.10.0, 2.9.1, 2.8.0). Locally torch stays the CPU build from uv.lock; for the Space it is replaced by this pin.
 # Change here if Hugging Face changes the list. Must satisfy sentence-transformers (torch>=2.2) and transformers (torch>=2.6).
 SPACE_TORCH_VERSION = "2.13.0"
+# Hugging Face installs its own packages next to our requirements.txt, roughly:
+#   pip install -r requirements.txt "torch<=2.13.0" gradio[oauth,mcp]==<sdk_version> "uvicorn>=0.14.0" "websockets>=10.4" spaces==0.51.3
+# The Space requirements are therefore resolved TOGETHER with these packages (uv pip compile), otherwise pins collide
+# (seen: pydantic, torch). Adjust here when the build log shows other versions.
+HF_GRADIO_EXTRAS = "oauth,mcp"
+HF_PACKAGES = ["uvicorn>=0.14.0", "websockets>=10.4", "spaces==0.51.3"]
+SPACE_PYTHON = "3.12"  # python_version in the Space README
+SPACE_PLATFORM = "x86_64-unknown-linux-gnu"
 SPACE_GITIGNORE = "__pycache__/\n*.pyc\n.env\n.env.*\n"
 
 
@@ -41,24 +49,69 @@ def die(msg: str) -> None:
     sys.exit(f"build_space: {msg}")
 
 
-def export_requirements() -> str:
-    """requirements.txt for the Space via `uv export`. Gradio itself is left out (the Space installs it from `sdk_version`).
+def direct_dependencies() -> list[str]:
+    """Direct dependencies from pyproject.toml without torch (the Space gets its own pin)."""
+    import tomllib
 
-    uv.lock pins the local CPU build of torch (`+cpu` plus an extra index). ZeroGPU rejects that, so all torch lines
-    and index lines are removed and the plain version SPACE_TORCH_VERSION is pinned instead.
+    deps = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["dependencies"]
+    return [d for d in deps if re.split(r"[<>=!~\[ ;]", d, maxsplit=1)[0].lower() != "torch"]
+
+
+def space_requirements_input(sdk_version: str) -> list[str]:
+    """Everything that ends up in the Space environment: our direct dependencies plus what Hugging Face installs itself."""
+    return [
+        *direct_dependencies(),
+        f"torch=={SPACE_TORCH_VERSION}",
+        f"gradio[{HF_GRADIO_EXTRAS}]=={sdk_version}",
+        *HF_PACKAGES,
+    ]
+
+
+def uv_compile(requirements: list[str]) -> str:
+    """Resolve for the Space's Python and platform. Raises SystemExit with uv's message if the set is unsatisfiable."""
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as d:
+        src = Path(d) / "requirements.in"
+        src.write_text("\n".join(requirements) + "\n")
+        r = subprocess.run(
+            ["uv", "pip", "compile", str(src), "--python-version", SPACE_PYTHON, "--python-platform", SPACE_PLATFORM,
+             "--no-header", "--no-annotate", "--quiet"],
+            capture_output=True, text=True,
+        )
+    if r.returncode != 0:
+        die("uv pip compile could not resolve the Space requirements:\n" + r.stderr)
+    return r.stdout
+
+
+def export_requirements(sdk_version: str | None = None) -> str:
+    """requirements.txt for the Space, resolved for Python 3.12 / Linux together with the packages Hugging Face adds.
+
+    Locally uv.lock pins the CPU build of torch (`+cpu`, extra index); that never reaches the Space.
     """
-    out = subprocess.run(
-        ["uv", "export", "--no-dev", "--no-group", "app", "--no-hashes", "--no-emit-project", "--no-annotate"],
-        cwd=ROOT, check=True, capture_output=True, text=True,
-    ).stdout
-    if re.search(r"^gradio(-client)?==", out, re.M):
-        die("gradio is in the exported requirements; keep it out (sdk_version provides it)")
-    return space_requirements(out)
+    sdk_version = sdk_version or pinned_gradio()
+    out = uv_compile(space_requirements_input(sdk_version))
+    problems = check_requirements(out, sdk_version)
+    if problems:
+        die("generated requirements are invalid: " + "; ".join(problems))
+    return out
 
 
-def space_requirements(exported: str) -> str:
-    lines = [ln for ln in exported.splitlines() if not re.match(r"^(torch==|--(extra-)?index-url\b)", ln)]
-    return "\n".join(lines).rstrip("\n") + f"\ntorch=={SPACE_TORCH_VERSION}\n"
+def check_requirements(reqs: str, sdk_version: str) -> list[str]:
+    problems = []
+    if "+cpu" in reqs or re.search(r"^\s*--(extra-)?index-url", reqs, re.M):
+        problems.append("contains +cpu or an index line (ZeroGPU rejects it)")
+    if f"torch=={SPACE_TORCH_VERSION}" not in reqs.splitlines():
+        problems.append(f"torch=={SPACE_TORCH_VERSION} missing")
+    if f"gradio=={sdk_version}" not in reqs.splitlines():
+        problems.append(f"gradio=={sdk_version} missing")
+    return problems
+
+
+def check_against_hf(reqs: str, sdk_version: str) -> None:
+    """Resolve the finished file together with the Hugging Face install command, as the Space build does."""
+    uv_compile([*[ln for ln in reqs.splitlines() if ln and not ln.startswith("#")],
+                f"torch<={SPACE_TORCH_VERSION}", f"gradio[{HF_GRADIO_EXTRAS}]=={sdk_version}", *HF_PACKAGES])
 
 
 def pinned_gradio() -> str:
@@ -86,6 +139,14 @@ def check_index() -> None:
             for s in r["sources"]:
                 if s["id"] not in chunks or chunks[s["id"]].text != s["quote"]:
                     die(f"example {e['id']}/{lang} cites {s['id']} which no longer matches chunks.jsonl; re-run precompute_examples.py")
+
+
+def sdk_version_of(readme: str) -> str:
+    m = re.match(r"^---\n.*?\n---\n", readme, re.S)
+    sdk = re.search(r"sdk_version:\s*['\"]?([0-9.]+)", m.group(0)) if m else None
+    if not sdk:
+        die("no sdk_version in the Space README header")
+    return sdk.group(1)
 
 
 def space_readme(current: str) -> str:
@@ -142,12 +203,15 @@ def copy_tree(space: Path, dry: bool) -> list[str]:
     for f in INDEX_FILES:
         put(ROOT / "data" / "processed" / f, f"data/processed/{f}")
     put(ROOT / "data" / "examples.json", "data/examples.json")
-    reqs = export_requirements()
+    current_readme = (space / "README.md").read_text(encoding="utf-8")
+    sdk = sdk_version_of(current_readme)
+    reqs = export_requirements(sdk)
+    check_against_hf(reqs, sdk)
     if not dry:
         (ROOT / "requirements.txt").write_text(reqs, encoding="utf-8")  # tracked copy in this repo
     put(None, "requirements.txt", reqs)
     put(None, ".gitignore", SPACE_GITIGNORE)
-    put(None, "README.md", space_readme((space / "README.md").read_text(encoding="utf-8")))
+    put(None, "README.md", space_readme(current_readme))
     return done
 
 

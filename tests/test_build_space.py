@@ -30,29 +30,43 @@ def test_sdk_version_mismatch_is_refused():
         bs.space_readme(HEAD.replace("6.31.0", "5.0.0"))
 
 
-def test_space_requirements_pin_supported_torch_and_drop_cpu_index():
-    reqs = bs.export_requirements()
+def test_compile_input_has_direct_deps_hf_packages_and_torch_pin():
+    inp = bs.space_requirements_input("6.31.0")
+    assert f"torch=={bs.SPACE_TORCH_VERSION}" in inp
+    assert [i for i in inp if i.startswith("torch")] == [f"torch=={bs.SPACE_TORCH_VERSION}"]  # local torch constraint dropped
+    assert "gradio[oauth,mcp]==6.31.0" in inp
+    for pkg in bs.HF_PACKAGES:
+        assert pkg in inp
+    assert any(i.startswith("anthropic") for i in inp) and any(i.startswith("sentence-transformers") for i in inp)
+
+
+def test_generated_requirements_are_zerogpu_safe_and_resolve_with_hf_packages():
+    sdk = bs.pinned_gradio()
+    reqs = bs.export_requirements(sdk)
     lines = reqs.splitlines()
-    assert [ln for ln in lines if ln.startswith("torch")] == [f"torch=={bs.SPACE_TORCH_VERSION}"]
+    assert [ln for ln in lines if ln.startswith("torch==")] == [f"torch=={bs.SPACE_TORCH_VERSION}"]
     assert "+cpu" not in reqs and "index-url" not in reqs
-    assert "gradio" not in reqs and "nvidia" not in reqs
+    assert f"gradio=={sdk}" in lines and any(ln.startswith("spaces==") for ln in lines)
     assert any(ln.startswith("sentence-transformers==") for ln in lines)
-    assert reqs.endswith("\n") and not reqs.endswith("\n\n")
+    pyd = next(ln for ln in lines if ln.startswith("pydantic=="))
+    assert tuple(map(int, pyd.split("==")[1].split("."))) <= (2, 12, 5)  # gradio[mcp] 6.31.0 requires pydantic<=2.12.5
+    bs.check_against_hf(reqs, sdk)  # exits if it does not resolve together with the Hugging Face install command
 
 
-def test_space_requirements_replace_all_torch_lines():
-    exported = (
-        "--extra-index-url https://download.pytorch.org/whl/cpu\nnumpy==2.5.4\n"
-        "torch==2.14.1 ; sys_platform == 'darwin'\ntorch==2.15.0+cpu ; sys_platform != 'darwin'\ntorchvision==0.1\n"
-    )
-    out = bs.space_requirements(exported)
-    assert out == f"numpy==2.5.4\ntorchvision==0.1\ntorch=={bs.SPACE_TORCH_VERSION}\n"
+def test_check_requirements_flags_cpu_index_and_missing_pins():
+    ok = f"torch=={bs.SPACE_TORCH_VERSION}\ngradio==6.31.0\n"
+    assert bs.check_requirements(ok, "6.31.0") == []
+    assert bs.check_requirements("--extra-index-url https://x\ntorch==2.15.0+cpu\n", "6.31.0")
+    assert bs.check_requirements("gradio==6.31.0\n", "6.31.0")  # torch pin missing
 
 
-def test_pinned_torch_is_compatible_with_dependency_constraints():
-    from packaging.version import Version
+def test_unsatisfiable_set_makes_the_script_stop():
+    with pytest.raises(SystemExit):
+        bs.uv_compile(["pydantic==2.14.3", "gradio[mcp]==6.31.0"])
 
-    assert Version(bs.SPACE_TORCH_VERSION) >= Version("2.6")  # transformers needs torch>=2.6, sentence-transformers >=2.2
+
+def test_sdk_version_is_read_from_space_readme():
+    assert bs.sdk_version_of(HEAD) == "6.31.0"
 
 
 def test_dry_run_into_fake_space_writes_nothing(tmp_path):
