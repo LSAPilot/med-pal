@@ -112,3 +112,8 @@ def test_vector_finds_content_question(real):
 @needs_index
 def test_index_matches_chunks(real):
     assert len(real.store) == len(read_chunks(OUT_PATH)) == len(real.chunks)
+
+
+def test_store_search_with_k_zero_is_empty():
+    store = NumpyVectorStore(["a", "b"], np.eye(2, dtype=np.float32))
+    assert store.search(np.array([1.0, 0.0]), 0) == []
