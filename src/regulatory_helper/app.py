@@ -1,4 +1,4 @@
-"""Section 4: Gradio user interface. Presentation only: all logic lives in `service.Service`.
+"""Gradio user interface. Presentation only: all logic lives in `service.Service`.
 
 Layout: chat (history of the last 3 rounds lives in the browser session via gr.State), answer language, collapsible
 sources under every answer, and a collapsed "under the hood" area (search mode, rewritten query, top hits with scores).
@@ -11,9 +11,8 @@ import os
 import gradio as gr
 
 from .generate import Turn
+from .retrieval import DEFAULT_MODE, MODES
 from .service import Reply, Service, example_reply, load_examples
-
-log = logging.getLogger("regulatory_helper")
 
 # --------------------------------------------------------------------------
 # texts (the interface follows the answer language)
@@ -53,7 +52,7 @@ T = {
 }
 
 
-def format_sources(reply: Reply, lang: str) -> str:
+def format_sources(reply: Reply) -> str:
     """Markdown with the English original quotes. Shown inside a collapsible message."""
     return "\n\n".join(
         f"**[{s['id']}]** {s['citation']}\n\n> " + s["quote"].replace("\n", "\n> ") for s in reply.sources
@@ -65,7 +64,7 @@ def messages_for(question: str, reply: Reply, lang: str) -> list[gr.ChatMessage]
     if reply.sources:
         out.append(
             gr.ChatMessage(
-                role="assistant", content=format_sources(reply, lang),
+                role="assistant", content=format_sources(reply),
                 metadata={"title": f"{T[lang]['sources']} ({len(reply.sources)})", "status": "done"},
             )
         )
@@ -109,9 +108,9 @@ def build_demo(service: Service | None = None) -> gr.Blocks:
             send = gr.Button(T["de"]["send"], variant="primary", scale=1)
         new = gr.Button(T["de"]["new"], size="sm")
         ex_label = gr.Markdown(f"**{T['de']['examples']}**", visible=bool(examples))
-        ex_buttons = [gr.Button(e["question"]["de"], size="sm", visible=True) for e in examples]
+        ex_buttons = [gr.Button(e["question"]["de"], size="sm") for e in examples]
         with gr.Accordion(T["de"]["hood"], open=False) as hood:
-            mode = gr.Radio(["hybrid", "bm25", "vector"], value="hybrid", label=T["de"]["mode"])
+            mode = gr.Radio(sorted(MODES, key=lambda m: m != DEFAULT_MODE), value=DEFAULT_MODE, label=T["de"]["mode"])
             query_box = gr.Textbox(label=T["de"]["query"], interactive=False)
             hits_df = gr.Dataframe(headers=T["de"]["cols"], label=T["de"]["hits"], interactive=False, wrap=True)
 
@@ -122,7 +121,7 @@ def build_demo(service: Service | None = None) -> gr.Blocks:
         def finish(question, reply, hist, lang_v, chat_v):
             chat_v = (chat_v or []) + messages_for(question, reply, lang_v)
             if reply.counted:
-                hist = (hist + [Turn(question, reply.text)])[-service.cfg.max_history_turns:]
+                hist = [*hist, Turn(question, reply.text)][-service.cfg.max_history_turns:]
             q, rows = hood_view(reply, lang_v)
             return chat_v, hist, "", q, rows
 
@@ -141,24 +140,25 @@ def build_demo(service: Service | None = None) -> gr.Blocks:
                 f"**{t['examples']}**", gr.update(label=t["hood"]), gr.update(label=t["mode"]), gr.update(label=t["query"]),
                 gr.update(label=t["hits"], headers=t["cols"]),
             ]
-            return ups + [gr.update(value=e["question"][lang_v]) for e in examples]
+            return [*ups, *(gr.update(value=e["question"][lang_v]) for e in examples)]
 
-        io = dict(inputs=[box, history, lang, mode, chat], outputs=[chat, history, box, query_box, hits_df])
-        box.submit(ask, **io)
-        send.click(ask, **io)
+        outputs = [chat, history, box, query_box, hits_df]
+        box.submit(ask, [box, history, lang, mode, chat], outputs)
+        send.click(ask, [box, history, lang, mode, chat], outputs)
         for i, b in enumerate(ex_buttons):
-            b.click(lambda h, l, c, i=i: ask_example(i, h, l, c), [history, lang, chat], [chat, history, box, query_box, hits_df])
-        new.click(reset, [lang], [chat, history, box, query_box, hits_df])
+            b.click(lambda h, lng, c, i=i: ask_example(i, h, lng, c), [history, lang, chat], outputs)
+        new.click(reset, [lang], outputs)
         lang.change(
             switch_lang, [lang],
-            [title, notices, lang, chat, box, send, new, ex_label, hood, mode, query_box, hits_df] + ex_buttons,
+            [title, notices, lang, chat, box, send, new, ex_label, hood, mode, query_box, hits_df, *ex_buttons],
         )
     return demo
 
 
 def launch() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    logging.getLogger("httpx").setLevel(logging.WARNING)  # request lines are harmless, but noise
+    for name in ("httpx", "httpx2"):  # request lines are harmless, but noise
+        logging.getLogger(name).setLevel(logging.WARNING)
     service = Service()
     service.warm_up()
     demo = build_demo(service)

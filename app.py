@@ -17,7 +17,7 @@ try:
 except ImportError:  # local run or CPU hardware
     pass
 
-from regulatory_helper.app import launch  # noqa: E402
+from regulatory_helper.app import launch
 
 if __name__ == "__main__":
     launch()

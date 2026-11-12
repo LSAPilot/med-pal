@@ -12,12 +12,16 @@ Chunk kinds
 * annex     : one chunk per numbered point (table row) or per heading section.
 * recital   : one chunk per recital.
 
-The ID scheme is described in docs/chunking.md.
+Chunks longer than MAX_CHARS are split into parts "<id>-s1", "<id>-s2", ...
+
+IDs: "<LAW>-<article>-<paragraph>" (e.g. MDR-10-9), "<LAW>-REC-<n>", "<LAW>-ANNEX-<numeral>-<point>"
+("intro" for text before the first heading, "n<k>" for unnumbered sections). Details: docs/chunking.md.
 """
 from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -72,7 +76,7 @@ class Chunk:
     citation: str  # human readable, e.g. "MDR Art. 10(9)"
 
     def contextual_text(self) -> str:
-        """Text with its context in front (used for embeddings in section 2)."""
+        """Text with its context in front (what gets embedded and BM25-indexed)."""
         return f"{self.citation} - {self.title}\n{self.text}"
 
 
@@ -164,9 +168,7 @@ def _render_children(el: etree._Element, level: int) -> list[str]:
     if el.text and clean(el.text):
         lines.append(ind + clean(el.text))
     for ch in el:
-        if ch.tag in ("table",) or "grid-container" in (ch.get("class") or ""):
-            lines.extend(render(ch, level))
-        elif ch.tag in ("p", "div"):
+        if ch.tag in ("table", "p", "div") or "grid-container" in (ch.get("class") or ""):
             lines.extend(render(ch, level))
         else:  # inline element directly in a cell
             t = clean(etree.tostring(ch, method="text", encoding="unicode"))
@@ -174,7 +176,6 @@ def _render_children(el: etree._Element, level: int) -> list[str]:
                 lines.append(ind + t)
         if ch.tail and clean(ch.tail):
             lines.append(ind + clean(ch.tail))
-    # merge a line into the previous if the container was just inline text pieces
     return lines
 
 
@@ -380,7 +381,7 @@ def chunk_recitals(law: str, root: etree._Element, raw_name: str) -> list[Chunk]
 # --------------------------------------------------------------------------
 
 _HEAD_NUM_RE = re.compile(r"^(\d+(?:\.\d+)*)\.?\s+")
-_LABEL_ONLY_RE = re.compile(r"^(CHAPTER|SECTION|PART|Section|Part|Chapter)\s+[\w]+$")
+_LABEL_RE = re.compile(r"^(CHAPTER|SECTION|PART|Section|Part|Chapter)\s+(\w+)")
 
 
 def _annex_numeral(name: str) -> str:
@@ -414,8 +415,7 @@ def chunk_annexes(law: str, root: etree._Element, raw_name: str) -> list[Chunk]:
         annex_title = text_of(titles[0]) if titles else ""
         # a heading-stack walk
         stack: list[tuple[int, str, str | None]] = []  # (depth, text, number)
-        units: list[dict] = []  # each: {path, number, lines}
-        counter = 0
+        units: list[dict] = []  # each: {path, number, lines, intro[, point]}
         cur: dict | None = None
 
         def flush():
@@ -425,14 +425,12 @@ def chunk_annexes(law: str, root: etree._Element, raw_name: str) -> list[Chunk]:
             cur = None
 
         def start(number, path_after, intro=False):
-            nonlocal cur, counter
+            nonlocal cur
             flush()
-            counter += 1
-            cur = {"path": [t for _, t, _ in path_after], "number": number, "lines": [], "seq": counter, "intro": intro}
+            cur = {"path": [t for _, t, _ in path_after], "number": number, "lines": [], "intro": intro}
 
         skip_first_titles = {id(name_el[0])} | {id(t) for t in titles[:1]}
-        prev_was_label: tuple[int, int] | None = None  # (depth, index in stack)
-        pending_start = True
+        label_depth: int | None = None  # depth of a preceding "CHAPTER II"-style heading without title
         for ch in kids:
             if id(ch) in skip_first_titles:
                 continue
@@ -444,21 +442,20 @@ def chunk_annexes(law: str, root: etree._Element, raw_name: str) -> list[Chunk]:
                 if not htxt:
                     continue
                 flush()
-                if prev_was_label and prev_was_label[0] == depth and stack and stack[-1][0] == depth:
+                if label_depth == depth and stack and stack[-1][0] == depth:
                     # "CHAPTER II" followed by its title: merge into one path entry
                     d, t, n = stack[-1]
                     stack[-1] = (d, f"{t} - {htxt}", n)
-                    prev_was_label = None
+                    label_depth = None
                 else:
                     while stack and stack[-1][0] >= depth:
                         stack.pop()
                     m = _HEAD_NUM_RE.match(htxt)
                     stack.append((depth, htxt, m.group(1) if m else None))
-                    prev_was_label = (depth, len(stack) - 1) if _LABEL_ONLY_RE.match(htxt) else None
+                    label_depth = depth if _LABEL_RE.fullmatch(htxt) else None
                 start(stack[-1][2], stack)
-                cur["heading"] = True
                 continue
-            prev_was_label = None
+            label_depth = None
             # numbered top-level point (two-column table with a number in the first cell)
             if ch.tag == "table":
                 tds = _cells(ch)
@@ -468,9 +465,8 @@ def chunk_annexes(law: str, root: etree._Element, raw_name: str) -> list[Chunk]:
                         m = re.match(r"^(\d+(?:\.\d+)*)\.?$", mark)
                         if m:
                             flush()
-                            counter += 1
                             cur = {"path": [t for _, t, _ in stack], "number": m.group(1),
-                                   "lines": render_row_body(row[1]), "seq": counter, "intro": False, "point": True}
+                                   "lines": render_row_body(row[1]), "intro": False, "point": True}
                             flush()
                             # content after the point continues as a fresh section of the same heading
                         else:
@@ -484,7 +480,6 @@ def chunk_annexes(law: str, root: etree._Element, raw_name: str) -> list[Chunk]:
                 continue
             if cur is None or cur.get("point"):
                 start(stack[-1][2] if stack else None, stack, intro=not stack)
-                cur["intro"] = not stack
             cur["lines"].extend(lines)
         flush()
 
@@ -534,7 +529,7 @@ def render_row_body(td: etree._Element) -> list[str]:
 
 def _path_token(path: list[str]) -> str:
     for p in path:
-        m = re.match(r"^(CHAPTER|SECTION|PART|Section|Part|Chapter)\s+([\w]+)", p)
+        m = _LABEL_RE.match(p)
         if m:
             return f"{m.group(1)[0].upper()}{m.group(2)}"
     return ""
@@ -552,8 +547,7 @@ def build_chunks(raw_dir: Path = RAW_DIR) -> list[Chunk]:
         chunks.extend(chunk_recitals(law, load(cfg["recitals"], raw_dir), cfg["recitals"]))
         chunks.extend(chunk_articles(law, main, cfg["articles_annexes"]))
         chunks.extend(chunk_annexes(law, main, cfg["articles_annexes"]))
-    ids = [c.id for c in chunks]
-    dup = {i for i in ids if ids.count(i) > 1}
+    dup = [cid for cid, n in Counter(c.id for c in chunks).items() if n > 1]
     if dup:
         raise ValueError(f"duplicate chunk ids: {sorted(dup)[:10]}")
     return chunks
