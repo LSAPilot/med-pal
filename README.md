@@ -4,7 +4,7 @@ RAG system for regulatory questions about medical device software. You ask a que
 (German or English) and get an answer based **only** on the original legal texts, with
 every statement backed by a source (e.g. "MDR Art. 10(9)") and the original quote.
 
-> **Status:** work in progress. Sections 1a, 1b and 2 done (setup, raw data, chunking, search). No LLM answering yet.
+> **Status:** work in progress. Sections 1a, 1b, 2 and 3 done (setup, raw data, chunking, search, answering via CLI). No web interface yet.
 
 ## Important notices
 - **Not legal advice.** This is a research/portfolio tool. Do not rely on it for compliance decisions.
@@ -31,9 +31,11 @@ uv run regulatory-helper fetch     # downloads raw files into data/raw/ (+ manif
 uv run regulatory-helper ingest    # splits them into data/processed/chunks.jsonl (see docs/chunking.md)
 uv run regulatory-helper index     # embeddings + BM25 index (downloads the embedding model once, a few minutes on CPU)
 uv run regulatory-helper search "Rule 11 software classification" --mode hybrid   # bm25 | vector | hybrid, --k 6
-uv run pytest
+uv run regulatory-helper ask "Ist meine App ein Medizinprodukt?" --lang de [--mode hybrid] [--no-rewrite] [--verbose]
+uv run regulatory-helper chat --lang de   # session with follow-up questions (last 3 rounds, kept only in memory)
+uv run pytest                             # API is mocked in tests, no cost
 ```
-Copy `.env.example` to `.env` for the API key (needed from section 3 on, never commit it).
+Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (needed for `ask`/`chat`, never commit it).
 
 ## Layout
-See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics), `docs/embedding-model.md` and `docs/search-examples.md`. Code lives in `src/regulatory_helper/`.
+See `docs/data-format.md` (source formats) and `docs/chunking.md` (chunk fields, ID scheme, statistics), `docs/embedding-model.md` and `docs/search-examples.md` and `docs/answer-examples.md` (real answers, threshold calibration). Code lives in `src/regulatory_helper/`.
