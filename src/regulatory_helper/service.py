@@ -1,7 +1,7 @@
-"""Section 4: the one narrow entry point the user interface calls.
+"""The one narrow entry point the user interface calls.
 
 `Service.ask(...)` wraps `generate.answer_question` with limits, cache, input checks and error handling and returns a plain,
-JSON-serialisable `Reply`. The Gradio app (and a later custom frontend, see "Frontend Ausbau") contains no logic of its own.
+JSON-serialisable `Reply`. The Gradio app contains no logic of its own.
 
 Privacy: question texts are never logged. Only counters are kept: requests, outcomes, tokens, cost, errors.
 """
@@ -9,16 +9,17 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import asdict, dataclass, field
+import time
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 
 from . import generate
 from .chunking import ROOT
-from .generate import Answer, Config, Turn
-from .limits import AnswerCache, DailyLimit, LimitConfig, VisitorLimit
-from .retrieval import Retriever
+from .generate import LANGS, Answer, Config, Turn
+from .limits import AnswerCache, Clock, DailyLimit, LimitConfig, VisitorLimit
+from .retrieval import MODES, Retriever
 
-log = logging.getLogger("regulatory_helper")
+log = logging.getLogger(__name__)
 
 EXAMPLES_PATH = ROOT / "data" / "examples.json"
 
@@ -41,6 +42,7 @@ MESSAGES = {
         "en": "The answer could not be generated right now. Please try again later.",
     },
 }
+LIMIT_STATUSES = ("visitor_limit", "daily_limit")
 
 
 @dataclass
@@ -60,6 +62,10 @@ class Reply:
         return self.status in ("ok", "cached", "example")
 
 
+def _round(x: float | None, digits: int) -> float | None:
+    return None if x is None else round(x, digits)
+
+
 def reply_from_answer(ans: Answer) -> Reply:
     return Reply(
         text=ans.text,
@@ -68,11 +74,10 @@ def reply_from_answer(ans: Answer) -> Reply:
         sources=[asdict(s) for s in ans.sources],
         search_query=ans.search_query,
         hits=[
-            {"rank": h.rank, "id": h.chunk.id, "citation": h.chunk.citation, "score": round(h.score, 4),
-             "cosine": None if h.cosine is None else round(h.cosine, 3)}
+            {"rank": h.rank, "id": h.chunk.id, "citation": h.chunk.citation, "score": round(h.score, 4), "cosine": _round(h.cosine, 3)}
             for h in ans.hits
         ],
-        best_cosine=None if ans.best_cosine is None else round(ans.best_cosine, 3),
+        best_cosine=_round(ans.best_cosine, 3),
     )
 
 
@@ -98,11 +103,8 @@ class Service:
         limits: LimitConfig | None = None,
         retriever: Retriever | None = None,
         client=None,
-        clock=None,
+        clock: Clock = time.time,
     ):
-        import time
-
-        clock = clock or time.time
         self.cfg = cfg or Config()
         self.limits = limits or LimitConfig.from_env()
         self._retriever = retriever
@@ -129,16 +131,16 @@ class Service:
         """Load index and embedding model at startup so the first visitor does not wait for it."""
         self.retriever.search("warm up", mode="vector", k=1)
 
-    def _msg(self, key: str, lang: str, **kw) -> str:
-        return MESSAGES[key][lang].format(**kw)
-
     def _refuse(self, status: str, lang: str, **kw) -> Reply:
-        self.stats.limited += status in ("visitor_limit", "daily_limit")
-        return Reply(text=self._msg(status, lang, **kw), status=status, found=False, reason=status)
+        if status in LIMIT_STATUSES:
+            self.stats.limited += 1
+        log.info("request outcome=%s", status)
+        return Reply(text=MESSAGES[status][lang].format(**kw), status=status, found=False, reason=status)
 
     def ask(self, question: str, history: list[Turn] | None, lang: str, mode: str, visitor: str) -> Reply:
         """Answer one question for one visitor. Order of checks: input, cache, visitor limit, daily limit, API."""
-        lang = lang if lang in ("de", "en") else "de"
+        lang = lang if lang in LANGS else "de"
+        mode = mode if mode in MODES else self.cfg.mode
         question = (question or "").strip()
         self.stats.requests += 1
         if not question:
@@ -152,26 +154,30 @@ class Service:
         if cached is not None:
             self.stats.cache_hits += 1
             log.info("request outcome=cache_hit")
-            return Reply(**{**asdict(cached), "status": "cached"})
+            return replace(cached, status="cached")
 
         if not self.visitors.allowed(visitor):
             wait = max(1, round(self.visitors.retry_after_s(visitor) / 60))
-            log.info("request outcome=visitor_limit")
             return self._refuse("visitor_limit", lang, n=self.limits.visitor_limit, m=wait)
         if not self.daily.allowed():
-            log.info("request outcome=daily_limit")
             return self._refuse("daily_limit", lang)
 
         self.visitors.record(visitor)
         self.daily.record()
-        cfg = Config(**{**asdict(self.cfg), "mode": mode if mode in ("bm25", "vector", "hybrid") else self.cfg.mode})
         try:
-            ans = generate.answer_question(question, hist, lang, cfg, self.retriever, self.client)
+            ans = generate.answer_question(question, hist, lang, replace(self.cfg, mode=mode), self.retriever, self.client)
         except Exception as e:  # never show internals to visitors, never log the question or the exception message
             self.stats.errors += 1
             log.error("request outcome=error type=%s", type(e).__name__)
-            return Reply(text=self._msg("error", lang), status="error", found=False, reason="error")
+            return Reply(text=MESSAGES["error"][lang], status="error", found=False, reason="error")
 
+        self._count(ans)
+        reply = reply_from_answer(ans)
+        if ans.reason != "invalid_output":  # do not cache failures
+            self.cache.put(key, reply)
+        return reply
+
+    def _count(self, ans: Answer) -> None:
         u = ans.usage
         self.stats.input_tokens += u.input_tokens
         self.stats.output_tokens += u.output_tokens
@@ -186,10 +192,6 @@ class Service:
             "request outcome=%s tokens=%d/%d cost=$%.5f | totals: requests=%d cost=$%.4f",
             ans.reason, u.input_tokens, u.output_tokens, u.cost_usd, self.stats.requests, self.stats.cost_usd,
         )
-        reply = reply_from_answer(ans)
-        if ans.reason != "invalid_output":  # do not cache failures
-            self.cache.put(key, reply)
-        return reply
 
 
 # --------------------------------------------------------------------------

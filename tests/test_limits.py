@@ -168,3 +168,20 @@ def test_shipped_examples_are_valid():
         for lang in ("de", "en"):
             r = example_reply(e, lang)
             assert r.text and r.sources and r.hits and e["question"][lang]
+
+
+def test_idle_visitors_are_forgotten():
+    clock = Clock()
+    v = VisitorLimit(2, 60, clock)
+    for i in range(100):
+        v.record(f"10.0.0.{i}")
+    clock.t += 61
+    v.record("new")
+    assert len(v._events) == 1
+
+
+def test_unknown_mode_falls_back_and_shares_the_cache():
+    svc, c = make_service(["q", ans_json(["c1"])])
+    svc.ask("Same question", [], "en", "nonsense", "v1")
+    r = svc.ask("Same question", [], "en", "hybrid", "v1")
+    assert r.status == "cached" and len(c.calls) == 2
