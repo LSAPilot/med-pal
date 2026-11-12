@@ -1,6 +1,6 @@
 # Evaluation: does RAG help?
 
-Experiment from section 5b (design: vault note "Validierung Regulatory Copilot"). 30 questions (`eval/questions.jsonl`: 22 answerable, 5 without answer in the sources, 1 follow-up session with 3 turns; German and English). Three systems answered every question in the same setup (same answer instruction, effort `low`, `max_tokens` 2000, follow-ups with the system's own earlier answers as history):
+Experiment from section 5b (design: see the questions and method below). 30 questions (`eval/questions.jsonl`: 22 answerable, 5 without answer in the sources, 1 follow-up session with 3 turns; German and English). Three systems answered every question in the same setup (same answer instruction, effort `low`, `max_tokens` 2000, follow-ups with the system's own earlier answers as history):
 
 1. **RAG**: our system (`answer_question`: query rewriting, hybrid search, threshold, Haiku with JSON, ID check),
 2. **Haiku without RAG** (`claude-haiku-5-5`),
