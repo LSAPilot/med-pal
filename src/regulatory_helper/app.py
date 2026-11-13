@@ -7,10 +7,11 @@ from __future__ import annotations
 
 import logging
 import os
+from dataclasses import asdict
 
 import gradio as gr
 
-from .generate import Turn
+from .generate import LANGS, Turn
 from .retrieval import DEFAULT_MODE, MODES
 from .service import Reply, Service, example_reply, load_examples
 
@@ -89,6 +90,68 @@ def visitor_id(request: gr.Request | None) -> str:
 
 
 # --------------------------------------------------------------------------
+# public JSON endpoint /ask (used by the separate web frontend)
+# --------------------------------------------------------------------------
+
+MAX_HISTORY_ANSWER_CHARS = 12_000  # an answer is at most 2000 tokens (Config.answer_max_tokens); this is a generous bound
+
+INVALID_INPUT = {
+    "de": "Ungültige Anfrage: {why}.",
+    "en": "Invalid request: {why}.",
+}
+
+
+class InvalidInput(ValueError):
+    """Raised by the validators; `api_ask` turns it into an error Reply, it never reaches the caller as an exception."""
+
+
+def parse_history(raw: object, max_turns: int, max_question_chars: int) -> list[Turn]:
+    """Validate `[{"question": str, "answer": str}, ...]` sent by the frontend. The server keeps no state."""
+    if raw is None:
+        return []
+    if not isinstance(raw, (list, tuple)):
+        raise InvalidInput("history must be a list")
+    if len(raw) > max_turns:
+        raise InvalidInput(f"history has more than {max_turns} rounds")
+    turns = []
+    for item in raw:
+        if not isinstance(item, dict) or not isinstance(item.get("question"), str) or not isinstance(item.get("answer"), str):
+            raise InvalidInput("every history round needs a text question and a text answer")
+        if len(item["question"]) > max_question_chars or len(item["answer"]) > MAX_HISTORY_ANSWER_CHARS:
+            raise InvalidInput("a history round is too long")
+        turns.append(Turn(item["question"], item["answer"]))
+    return turns
+
+
+def invalid_reply(why: str, lang: object) -> Reply:
+    """Malformed request: the existing status `error` with reason `invalid_input`; text follows the language if it is valid."""
+    lng = lang if lang in LANGS else "de"
+    return Reply(text=INVALID_INPUT[lng].format(why=why), status="error", found=False, reason="invalid_input")
+
+
+def make_api_ask(service: Service):
+    """Build the function behind `/ask`. Returns the `Reply` as a JSON-serialisable dict, never raises on bad input."""
+
+    def api_ask(question: str, history: list, lang: str, mode: str, request: gr.Request) -> dict:
+        """Ask one question. history: up to 3 earlier rounds as [{question, answer}], kept by the caller (nothing is stored here).
+        lang: de or en. mode: bm25, vector or hybrid. Returns the reply: text, status, found, reason, sources, search_query, hits, best_cosine."""
+        try:
+            if lang not in LANGS:
+                raise InvalidInput(f"lang must be one of {', '.join(LANGS)}")
+            if mode not in MODES:
+                raise InvalidInput(f"mode must be one of {', '.join(MODES)}")
+            if not isinstance(question, str):
+                raise InvalidInput("question must be text")
+            turns = parse_history(history, service.cfg.max_history_turns, service.limits.max_question_chars)
+        except InvalidInput as e:
+            return asdict(invalid_reply(str(e), lang))
+        # empty / too long questions, limits and errors are handled by the service (statuses empty, too_long, ...)
+        return asdict(service.ask(question, turns, lang, mode, visitor_id(request)))
+
+    return api_ask
+
+
+# --------------------------------------------------------------------------
 # app
 # --------------------------------------------------------------------------
 
@@ -114,7 +177,7 @@ def build_demo(service: Service | None = None) -> gr.Blocks:
             query_box = gr.Textbox(label=T["de"]["query"], interactive=False)
             hits_df = gr.Dataframe(headers=T["de"]["cols"], label=T["de"]["hits"], interactive=False, wrap=True)
 
-        def ask(question, hist, lang_v, mode_v, chat_v, request: gr.Request):
+        def ask_chat(question, hist, lang_v, mode_v, chat_v, request: gr.Request):
             reply = service.ask(question, hist, lang_v, mode_v, visitor_id(request))
             return finish(question, reply, hist, lang_v, chat_v)
 
@@ -143,15 +206,20 @@ def build_demo(service: Service | None = None) -> gr.Blocks:
             return [*ups, *(gr.update(value=e["question"][lang_v]) for e in examples)]
 
         outputs = [chat, history, box, query_box, hits_df]
-        box.submit(ask, [box, history, lang, mode, chat], outputs)
-        send.click(ask, [box, history, lang, mode, chat], outputs)
+        # the UI events stay out of the API docs and the Gradio clients; only /ask is public. "private" is not an access
+        # control (the browser UI calls these events over the same queue), so every path still goes through Service.ask
+        private = {"api_visibility": "private"}
+        box.submit(ask_chat, [box, history, lang, mode, chat], outputs, **private)
+        send.click(ask_chat, [box, history, lang, mode, chat], outputs, **private)
         for i, b in enumerate(ex_buttons):
-            b.click(lambda h, lng, c, i=i: ask_example(i, h, lng, c), [history, lang, chat], outputs)
-        new.click(reset, [lang], outputs)
+            b.click(lambda h, lng, c, i=i: ask_example(i, h, lng, c), [history, lang, chat], outputs, **private)
+        new.click(reset, [lang], outputs, **private)
         lang.change(
             switch_lang, [lang],
             [title, notices, lang, chat, box, send, new, ex_label, hood, mode, query_box, hits_df, *ex_buttons],
+            **private,
         )
+        gr.api(make_api_ask(service), api_name="ask")
     return demo
 
 
