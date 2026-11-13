@@ -115,6 +115,11 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 const numOrNull = (v: unknown): number | null =>
   typeof v === "number" && Number.isFinite(v) ? v : null;
+/** Only absolute http(s) links are rendered; anything else (e.g. `javascript:`) becomes "". */
+const httpUrl = (v: unknown): string => {
+  const s = str(v).trim();
+  return /^https?:\/\//i.test(s) ? s : "";
+};
 
 function normalizeSource(v: unknown): Source | null {
   if (!isRecord(v)) return null;
@@ -123,7 +128,7 @@ function normalizeSource(v: unknown): Source | null {
     title: str(v.title),
     citation: str(v.citation),
     quote: str(v.quote),
-    source_url: str(v.source_url),
+    source_url: httpUrl(v.source_url),
   };
 }
 

@@ -32,6 +32,11 @@ describe("normalizeReply", () => {
     expect(r.hits).toEqual([]);
     expect(r.best_cosine).toBeNull();
   });
+  it("keeps only http(s) source links", () => {
+    const urls = ["https://eur-lex.europa.eu/x", "javascript:alert(1)", "data:text/html,x", "//evil.example", 7];
+    const r = normalizeReply({ status: "ok", sources: urls.map((source_url, i) => ({ id: `s${i}`, source_url })) });
+    expect(r.sources.map((s) => s.source_url)).toEqual(["https://eur-lex.europa.eu/x", "", "", "", ""]);
+  });
   it("keeps every reason the backend can send", () => {
     for (const reason of ["below_threshold", "model_no_answer", "invalid_output"]) {
       expect(normalizeReply({ status: "ok", found: false, reason }).reason).toBe(reason);
