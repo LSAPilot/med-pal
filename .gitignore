@@ -7,3 +7,10 @@ __pycache__/
 !.env.example
 data/processed/*
 !data/processed/.gitkeep
+
+# web frontend (Next.js)
+web/node_modules/
+web/out/
+web/.next/
+web/next-env.d.ts
+web/*.tsbuildinfo
