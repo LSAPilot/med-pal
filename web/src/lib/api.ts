@@ -66,6 +66,8 @@ export interface Turn {
   answer: string;
 }
 
+// Mirror the backend: Config.max_history_turns, LimitConfig.max_question_chars (default; the Space can override it
+// with MAX_QUESTION_CHARS, then the backend's too_long reply still applies) and app.MAX_HISTORY_ANSWER_CHARS.
 export const MAX_HISTORY_TURNS = 3;
 export const MAX_QUESTION_CHARS = 500;
 const MAX_HISTORY_ANSWER_CHARS = 12_000;
@@ -97,12 +99,12 @@ const FALLBACK_TEXT: Record<Lang, string> = {
 };
 
 /** A Reply with status "error", used for network problems and unusable responses. */
-export function errorReply(lang: Lang = "de", reason: Reason = "error"): Reply {
+export function errorReply(lang: Lang = "de"): Reply {
   return {
     text: FALLBACK_TEXT[lang],
     status: "error",
     found: false,
-    reason,
+    reason: "error",
     sources: [],
     search_query: "",
     hits: [],
@@ -178,7 +180,7 @@ export function normalizeReply(value: unknown, lang: Lang = "de"): Reply {
 
 let clientPromise: Promise<Client> | null = null;
 
-/** One shared connection, created on first use. A failed connect is not cached, so the next call retries. */
+/** One shared connection, created on first use. A failed connect or call is not cached, so the next call retries. */
 function getClient(): Promise<Client> {
   const target = process.env.NEXT_PUBLIC_SPACE_ID;
   if (!target) return Promise.reject(new Error("NEXT_PUBLIC_SPACE_ID is not set"));
@@ -216,6 +218,8 @@ export async function ask(
     const data: unknown = result.data;
     return normalizeReply(Array.isArray(data) ? data[0] : data, lang);
   } catch {
+    // Drop the shared connection, so the next question connects afresh (e.g. after the Space restarted).
+    clientPromise = null;
     return errorReply(lang);
   }
 }
