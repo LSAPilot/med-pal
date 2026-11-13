@@ -1,4 +1,4 @@
-# Regulatory Copilot web frontend
+# med-pal web frontend
 
 Static Next.js site (App Router, TypeScript, Tailwind CSS v4, `output: "export"`) that talks to the Gradio Space
 backend (`/ask` endpoint) directly from the browser via `@gradio/client`. Hosted on Cloudflare Workers Static Assets
@@ -25,7 +25,13 @@ npm run lint && npm run typecheck && npm test
   Always resolves with a `Reply`; network errors and malformed responses become status `error`. History is trimmed to 3 rounds.
 - `src/lib/mock.ts`: mock backend, loaded only in mock mode.
 - `src/hooks/useConversation.ts`: chat entries plus derived history (last 3 real answers), mirrored to `sessionStorage` when available.
-- `src/app/page.tsx`: unstyled test page, replaced in F3.
+- `src/hooks/usePreferences.ts`: language (browser language by default) and search mode, kept per browser session.
+- `src/lib/i18n.ts`: all UI texts in German and English.
+- `src/app/page.tsx`: the single page. Holds the state and arranges the components below.
+- `src/app/globals.css`: design tokens (Tailwind v4 `@theme`: colours with measured contrast ratios, type scale, radii,
+  shadows, motion) and the reduced-motion rule.
+- `src/app/layout.tsx`: fonts (Source Sans 3 and Source Serif 4 via `next/font`, self-hosted at build time) and metadata.
+  `src/app/icon.svg` is the favicon.
 
 ## Mock triggers
 
@@ -37,11 +43,38 @@ In mock mode put a keyword anywhere in the question (case-insensitive). Default 
 | `mock:cached` | status `cached` |
 | `mock:example` | status `example` |
 | `mock:notfound` | status `ok`, `found: false`, reason `below_threshold` |
+| `mock:noanswer` | status `ok`, `found: false`, reason `model_no_answer` |
 | `mock:invalid` | status `ok`, `found: false`, reason `invalid_output` |
+| `mock:long` | normal answer plus one very long source quote (tests the "show more" clamp) |
 | `mock:visitor` | `visitor_limit` |
 | `mock:daily` | `daily_limit` |
 | `mock:error` | `error` |
+| `mock:slow` | normal answer after 8 s (shows the cold-start loading text) |
 | blank question | `empty` |
 | more than 500 characters | `too_long` |
 
-Texts follow the selected language (`de`/`en`). Every mock reply takes about 600 ms.
+Texts follow the selected language (`de`/`en`). Every mock reply takes about 600 ms (`mock:slow`: 8 s).
+
+## Components (`src/components/`)
+
+| Component | Job |
+|---|---|
+| `Header`, `Logo`, `NoticeBar` | Masthead with wordmark, tagline, DE/EN switch and the three fixed notices as one unit |
+| `SegmentedControl` | Radio group drawn as segments (language, search mode); arrow keys come from native radios |
+| `EmptyState` | Start view: lead text, example questions, knowledge-base note |
+| `Composer` | Sticky input: search mode, "new conversation", textarea with 500-character counter, send button |
+| `ChatEntry` | One question with its reply; picks the right message for each status and reason |
+| `AnswerText` | Answer paragraphs; `[citation]` marks become chips that open the matching source |
+| `Disclosure` | Collapsible section (`aria-expanded`, 200 ms height transition, `inert` when closed) |
+| `SourceList`, `QuoteBlock` | Sources with the original quote in serif (clamped to 8 lines with "show more"), EUR-Lex link |
+| `UnderTheHood` | Search mode, rewritten query, hit table with scores and similarity bars |
+| `LoadingIndicator` | Pulsing dots; if the first request of the page load takes over 3 s, the "waking up the backend" text (cold start) |
+| `StatusNotice` | Amber (refusal, limits, input problems) or muted red (errors) message box |
+
+## Design rules
+
+- Colours, type, radii and motion come from the tokens in `globals.css`; do not hard-code hex values in components.
+- `accent` (#4BA3E3) is decoration only. It has too little contrast for text.
+- All motion is CSS, 150 to 250 ms, and switched off by `prefers-reduced-motion`. No scroll effects.
+- Every `Reply` state has a friendly message: `found: false` is an honest refusal (amber), `error` and
+  `invalid_output` are errors (red).
