@@ -37,7 +37,8 @@ export function QuoteBlock({ t, id, quote }: Props) {
         id={id}
         lang="en"
         className={cn(
-          "break-words border-l-[3px] border-accent bg-surface/60 py-2 pl-4 pr-3 font-serif text-[1.0625rem] leading-[1.7] text-ink",
+          // pre-line: the law texts mark list items ("— ...", "(a) ...") with line breaks
+          "whitespace-pre-line break-words border-l-[3px] border-accent bg-surface/60 py-2 pl-4 pr-3 font-serif text-[1.0625rem] leading-[1.7] text-ink",
           !expanded && "line-clamp-8",
           !expanded && clampable && "[mask-image:linear-gradient(to_bottom,black_75%,transparent)]",
         )}
