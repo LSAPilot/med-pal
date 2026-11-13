@@ -82,7 +82,7 @@ export const ChatEntry = forwardRef<HTMLElement, Props>(function ChatEntry({ t, 
       <div className="animate-fade-in mt-5">
         {answered && (
           <>
-            <AnswerText text={reply.text} sources={reply.sources} onCite={openSource} />
+            <AnswerText t={t} text={reply.text} sources={reply.sources} onCite={openSource} />
             {(reply.status === "cached" || reply.status === "example") && (
               <p className="mt-3 text-meta text-ink-muted">{reply.status === "cached" ? t.cached : t.example}</p>
             )}

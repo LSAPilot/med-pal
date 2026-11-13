@@ -53,6 +53,22 @@ describe("turnsFromEntries", () => {
     const turns = turnsFromEntries([entry("ok", 1), entry("error", 2), entry("cached", 3), entry("ok", 4), entry("ok", 5)]);
     expect(turns.map((t) => t.question)).toEqual(["q3", "q4", "q5"]);
   });
+  it("skips replies with reason invalid_output (error text, not an answer)", () => {
+    const bad = { question: "qx", reply: normalizeReply({ status: "ok", reason: "invalid_output", text: "kaputt" }) };
+    expect(turnsFromEntries([entry("ok", 1), bad, entry("ok", 2)]).map((t) => t.question)).toEqual(["q1", "q2"]);
+  });
+});
+
+describe("mock answer markers", () => {
+  it("every [n] in the default mock answer resolves to a source", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_MODE", "mock");
+    for (const lang of ["de", "en"] as const) {
+      const r = await ask("Wie wird Software klassifiziert?", [], lang, "hybrid");
+      const nums = [...r.text.matchAll(/\[(\d+)\]/g)].map((m) => Number(m[1]));
+      expect(nums).toEqual([1, 2]);
+      expect(r.sources.length).toBeGreaterThanOrEqual(2);
+    }
+  });
 });
 
 describe("ask in mock mode", () => {

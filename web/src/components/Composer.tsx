@@ -25,6 +25,7 @@ export function Composer({ t, mode, onModeChange, pending, canReset, onReset, on
   const [value, setValue] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
   const counterId = useId();
+  const fieldId = useId();
   const hintId = useId();
 
   // Grow with the text up to about six lines.
@@ -89,11 +90,11 @@ export function Composer({ t, mode, onModeChange, pending, canReset, onReset, on
             over ? "border-danger-ink" : "border-line-strong",
           )}
         >
-          <label htmlFor="question" className="sr-only">
+          <label htmlFor={fieldId} className="sr-only">
             {t.composerLabel}
           </label>
           <textarea
-            id="question"
+            id={fieldId}
             ref={ref}
             rows={1}
             value={value}
@@ -112,7 +113,7 @@ export function Composer({ t, mode, onModeChange, pending, canReset, onReset, on
           <button
             type="submit"
             disabled={!canSend}
-            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-control bg-primary px-3.5 font-semibold text-white transition-colors duration-150 ease-standard hover:bg-primary-strong disabled:bg-line disabled:text-ink-muted sm:px-4"
+            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-control bg-primary px-3.5 font-semibold text-on-primary transition-colors duration-150 ease-standard hover:bg-primary-strong disabled:bg-line disabled:text-ink-muted sm:px-4"
           >
             <ArrowUp className="size-4" />
             <span className="hidden sm:inline">{pending ? t.sending : t.send}</span>

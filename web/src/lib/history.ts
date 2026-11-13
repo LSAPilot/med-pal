@@ -8,10 +8,13 @@ export interface Entry {
   mode?: Mode;
 }
 
-/** The history to send with the next question: real answers only (also "not in the sources"), last 3 rounds. */
+/**
+ * The history to send with the next question: real answers only (also "not in the sources"), last 3 rounds.
+ * An `invalid_output` reply carries only the error message, not an answer, so it is left out.
+ */
 export function turnsFromEntries(entries: readonly Entry[]): Turn[] {
   const turns = entries
-    .filter((e) => isAnswerStatus(e.reply.status))
+    .filter((e) => isAnswerStatus(e.reply.status) && e.reply.reason !== "invalid_output")
     .map((e) => ({ question: e.question, answer: e.reply.text }));
   return trimHistory(turns);
 }

@@ -1,4 +1,4 @@
-import type { Lang, Mode } from "./api";
+import { MAX_QUESTION_CHARS, type Lang, type Mode } from "./api";
 
 /** Title and hint of a message box. */
 export interface Message {
@@ -38,6 +38,10 @@ export interface Strings {
   example: string;
 
   sources: string;
+  /** "Source" before a number, for the screen reader label of a citation marker. */
+  sourceRef: string;
+  /** Browser tab title. */
+  documentTitle: string;
   sourceOriginal: string;
   sourceOpen: string;
   newWindow: string;
@@ -115,6 +119,8 @@ const de: Strings = {
   example: "Vorbereitete Beispielantwort",
 
   sources: "Quellen",
+  sourceRef: "Quelle",
+  documentTitle: "med-pal: Fragen zu MDR, DSGVO und AI Act",
   sourceOriginal: "Originaltext, Englisch",
   sourceOpen: "Auf EUR-Lex lesen",
   newWindow: "(öffnet in neuem Fenster)",
@@ -160,7 +166,7 @@ const de: Strings = {
   },
   tooLong: {
     title: "Die Frage ist zu lang",
-    hint: "Fasse sie auf höchstens 500 Zeichen zusammen.",
+    hint: `Fasse sie auf höchstens ${MAX_QUESTION_CHARS} Zeichen zusammen.`,
   },
   empty: {
     title: "Keine Frage eingegeben",
@@ -218,6 +224,8 @@ const en: Strings = {
   example: "Prepared example answer",
 
   sources: "Sources",
+  sourceRef: "Source",
+  documentTitle: "med-pal: Questions on the MDR, GDPR and AI Act",
   sourceOriginal: "Original text, English",
   sourceOpen: "Read on EUR-Lex",
   newWindow: "(opens in a new window)",
@@ -263,7 +271,7 @@ const en: Strings = {
   },
   tooLong: {
     title: "The question is too long",
-    hint: "Shorten it to 500 characters or fewer.",
+    hint: `Shorten it to ${MAX_QUESTION_CHARS} characters or fewer.`,
   },
   empty: {
     title: "No question entered",

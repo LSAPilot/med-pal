@@ -20,10 +20,11 @@ export default function Home() {
   const lastRef = useRef<HTMLElement>(null);
   const pendingRef = useRef<HTMLDivElement>(null);
 
-  // Keep the document language in step with the switch (screen readers, hyphenation).
+  // Keep document language and tab title in step with the switch (screen readers, hyphenation, tabs).
   useEffect(() => {
     document.documentElement.lang = lang;
-  }, [lang]);
+    document.title = t.documentTitle;
+  }, [lang, t.documentTitle]);
 
   // A new question or reply brings the newest block to the top of the view.
   useEffect(() => {

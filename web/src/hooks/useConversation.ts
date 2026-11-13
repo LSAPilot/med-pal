@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ask, normalizeReply, type Lang, type Mode, type Reply } from "@/lib/api";
 import { turnsFromEntries, type Entry } from "@/lib/history";
 
-const STORAGE_KEY = "regulatory-copilot:conversation";
+const STORAGE_KEY = "med-pal:conversation";
 const MAX_STORED_ENTRIES = 30;
 
 function load(): Entry[] {
@@ -71,5 +71,5 @@ export function useConversation() {
     save([]);
   }, []);
 
-  return { entries, history, pending, send, reset };
+  return { entries, pending, send, reset };
 }

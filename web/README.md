@@ -2,7 +2,7 @@
 
 Static Next.js site (App Router, TypeScript, Tailwind CSS v4, `output: "export"`) that talks to the Gradio Space
 backend (`/ask` endpoint) directly from the browser via `@gradio/client`. Hosted on Cloudflare Workers Static Assets
-(`wrangler.jsonc`). Node 22 (`.node-version`).
+(`wrangler.jsonc`, worker name `med-pal`). Node 22 (`.node-version`).
 
 ```bash
 npm install
@@ -23,6 +23,8 @@ npm run lint && npm run typecheck && npm test
 
 - `src/lib/api.ts`: types (`Reply`, `Source`, `Hit`, `Status`, `Lang`, `Mode`, `Turn`) and `ask(question, history, lang, mode)`.
   Always resolves with a `Reply`; network errors and malformed responses become status `error`. History is trimmed to 3 rounds.
+- `src/lib/citations.ts`: splits answer text at `[n]` markers (n = 1-based position in `sources`, written by the backend).
+  Only `[n]` with an existing source n counts; every other bracket stays plain text.
 - `src/lib/mock.ts`: mock backend, loaded only in mock mode.
 - `src/hooks/useConversation.ts`: chat entries plus derived history (last 3 real answers), mirrored to `sessionStorage` when available.
 - `src/hooks/usePreferences.ts`: language (browser language by default) and search mode, kept per browser session.
@@ -64,7 +66,7 @@ Texts follow the selected language (`de`/`en`). Every mock reply takes about 600
 | `EmptyState` | Start view: lead text, example questions, knowledge-base note |
 | `Composer` | Sticky input: search mode, "new conversation", textarea with 500-character counter, send button |
 | `ChatEntry` | One question with its reply; picks the right message for each status and reason |
-| `AnswerText` | Answer paragraphs; `[citation]` marks become chips that open the matching source |
+| `AnswerText` | Answer paragraphs; `[n]` markers become numbered chips that open source n (the source list is numbered the same way) |
 | `Disclosure` | Collapsible section (`aria-expanded`, 200 ms height transition, `inert` when closed) |
 | `SourceList`, `QuoteBlock` | Sources with the original quote in serif (clamped to 8 lines with "show more"), EUR-Lex link |
 | `UnderTheHood` | Search mode, rewritten query, hit table with scores and similarity bars |

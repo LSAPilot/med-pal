@@ -4,7 +4,7 @@
  * Deterministic triggers: put one of these keywords anywhere in the question to get that status
  * (case-insensitive). Without a keyword the reply is a normal answer (status "ok").
  *
- *   mock:ok            answered, with sources and hits (default)
+ *   mock:ok            answered, with sources and hits (default); the text carries [1] and [2] markers for sources 1 and 2
  *   mock:cached        same answer, status "cached"
  *   mock:example       answered, status "example" (curated example question)
  *   mock:notfound      status ok, found=false, reason below_threshold (honest "not in the sources")
@@ -27,19 +27,19 @@ const MAX_QUESTION_CHARS = 500;
 
 const SOURCES: Source[] = [
   {
-    id: "mdr-art-2-1",
-    title: "Regulation (EU) 2017/745 (MDR), Article 2: Definitions",
-    citation: "MDR Art. 2(1)",
-    quote:
-      "'medical device' means any instrument, apparatus, appliance, software, implant, reagent, material or other article intended by the manufacturer to be used, alone or in combination, for human beings for one or more of the following specific medical purposes: diagnosis, prevention, monitoring, prediction, prognosis, treatment or alleviation of disease [...]",
-    source_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0745",
-  },
-  {
     id: "mdr-annex-viii-r11",
     title: "Regulation (EU) 2017/745 (MDR), Annex VIII: Classification rules",
     citation: "MDR Annex VIII, Rule 11",
     quote:
       "Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause death or an irreversible deterioration of a person's state of health, in which case it is in class III [...]",
+    source_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0745",
+  },
+  {
+    id: "mdr-art-2-1",
+    title: "Regulation (EU) 2017/745 (MDR), Article 2: Definitions",
+    citation: "MDR Art. 2(1)",
+    quote:
+      "'medical device' means any instrument, apparatus, appliance, software, implant, reagent, material or other article intended by the manufacturer to be used, alone or in combination, for human beings for one or more of the following specific medical purposes: diagnosis, prevention, monitoring, prediction, prognosis, treatment or alleviation of disease [...]",
     source_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32017R0745",
   },
 ];
@@ -61,8 +61,8 @@ const HITS: Hit[] = [
 
 const TEXT = {
   ok: {
-    de: "Software, die Informationen für diagnostische oder therapeutische Entscheidungen liefert, gehört nach Regel 11 in Anhang VIII der MDR in der Regel zur Klasse IIa. Können solche Entscheidungen zum Tod oder zu einer irreversiblen Verschlechterung des Gesundheitszustands führen, gilt Klasse III [MDR Annex VIII, Rule 11]. Ob eine Software überhaupt ein Medizinprodukt ist, richtet sich nach der Definition in Art. 2 Nr. 1 [MDR Art. 2(1)].",
-    en: "Software that provides information used for diagnostic or therapeutic decisions is generally class IIa under Rule 11 of Annex VIII MDR. If such decisions can cause death or an irreversible deterioration of health, it is class III [MDR Annex VIII, Rule 11]. Whether software is a medical device at all depends on the definition in Article 2(1) [MDR Art. 2(1)].",
+    de: "Software, die Informationen für diagnostische oder therapeutische Entscheidungen liefert, gehört nach Regel 11 in Anhang VIII der MDR in der Regel zur Klasse IIa. Können solche Entscheidungen zum Tod oder zu einer irreversiblen Verschlechterung des Gesundheitszustands führen, gilt Klasse III [1]. Ob eine Software überhaupt ein Medizinprodukt ist, richtet sich nach der Definition in Art. 2 Nr. 1 [2].",
+    en: "Software that provides information used for diagnostic or therapeutic decisions is generally class IIa under Rule 11 of Annex VIII MDR. If such decisions can cause death or an irreversible deterioration of health, it is class III [1]. Whether software is a medical device at all depends on the definition in Article 2(1) [2].",
   },
   notfound: {
     de: "Dazu finde ich in den hinterlegten Quellen (MDR, DSGVO und AI Act) nichts Belastbares, deshalb beantworte ich die Frage nicht.",

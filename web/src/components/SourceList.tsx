@@ -10,13 +10,22 @@ interface Props {
   sources: readonly Source[];
 }
 
-/** Sources of one answer: citation, original quote set like a statute excerpt, link to EUR-Lex. */
+/** Look of the small numbered chip that links an `[n]` marker in the answer to source n (also used in the list). */
+export const citationChip =
+  "inline-block min-w-[1.5em] rounded-chip bg-surface px-1.5 text-center align-baseline text-meta font-semibold leading-[1.5] text-primary";
+
+/** Sources of one answer, numbered like the `[n]` markers in the text: citation, original quote, link to EUR-Lex. */
 export function SourceList({ t, idPrefix, sources }: Props) {
   return (
     <ol className="space-y-6">
-      {sources.map((s) => (
+      {sources.map((s, i) => (
         <li key={s.id} id={sourceDomId(idPrefix, s)} className="scroll-mt-4">
-          <p className="font-semibold text-navy">{s.citation}</p>
+          <p className="font-semibold text-navy">
+            <span className={`${citationChip} mr-2`} aria-hidden="true">
+              {i + 1}
+            </span>
+            {s.citation}
+          </p>
           {s.title && <p className="text-meta text-ink-muted">{s.title}</p>}
           <QuoteBlock t={t} id={`${sourceDomId(idPrefix, s)}-quote`} quote={s.quote} />
           <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-ink-muted">

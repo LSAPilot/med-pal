@@ -16,6 +16,7 @@
   --color-ink: #1c2733; /* body text. On white 15.1:1, on surface 13.7:1 */
   --color-ink-muted: #5a6b7d; /* secondary text. On white 5.5:1, on surface 4.9:1 */
   --color-on-navy: #ffffff;
+  --color-on-primary: #ffffff; /* text on primary and primary-strong, 5.9:1 and 8.4:1 */
 
   --color-notice-bg: #fbf3e0; /* amber: honest refusal, limits, cold start */
   --color-notice-line: #e3c77a;
