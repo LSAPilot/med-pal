@@ -30,7 +30,7 @@ from regulatory_helper.chunking import read_chunks  # noqa: E402
 from regulatory_helper.service import load_examples  # noqa: E402
 
 INDEX_FILES = ["chunks.jsonl", "embeddings.npy", "ids.json", "bm25.json", "index_meta.json"]
-FORBIDDEN = ["data/raw", "tests", "scripts", "docs", ".env", ".venv", "uv.lock", "pyproject.toml"]
+FORBIDDEN = ["data/raw", "tests", "scripts", "docs", ".env", ".venv", "uv.lock", "pyproject.toml", "web"]
 # ZeroGPU only accepts specific torch versions in the Space's requirements.txt (list shown in the build error, as of 2026-11-12:
 # 2.13.0, 2.12.1, 2.11.0, 2.10.0, 2.9.1, 2.8.0). Locally torch stays the CPU build from uv.lock; for the Space it is replaced by this pin.
 # Change here if Hugging Face changes the list. Must satisfy sentence-transformers (torch>=2.2) and transformers (torch>=2.6).
