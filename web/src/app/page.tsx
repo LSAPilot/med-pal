@@ -1,60 +1,83 @@
 "use client";
 
-// Minimal unstyled test page for the API client (F2). Replaced by the real UI in F3.
-import { useState } from "react";
-import type { Lang, Mode } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { STRINGS } from "@/lib/i18n";
 import { useConversation } from "@/hooks/useConversation";
+import { usePreferences } from "@/hooks/usePreferences";
+import { ChatEntry } from "@/components/ChatEntry";
+import { Composer } from "@/components/Composer";
+import { EmptyState } from "@/components/EmptyState";
+import { Header } from "@/components/Header";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
 
 export default function Home() {
-  const { entries, history, pending, send, reset } = useConversation();
-  const [question, setQuestion] = useState("");
-  const [lang, setLang] = useState<Lang>("de");
-  const [mode, setMode] = useState<Mode>("hybrid");
+  const { entries, pending, send, reset } = useConversation();
+  const { lang, mode, setLang, setMode } = usePreferences();
+  const [asked, setAsked] = useState<string | null>(null);
+  // Set once a request of this page load has come back without error; after that a slow reply is not a cold start.
+  const [warm, setWarm] = useState(false);
+  const t = STRINGS[lang];
+  const lastRef = useRef<HTMLElement>(null);
+  const pendingRef = useRef<HTMLDivElement>(null);
+
+  // Keep the document language in step with the switch (screen readers, hyphenation).
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  // A new question or reply brings the newest block to the top of the view.
+  useEffect(() => {
+    (pending ? pendingRef.current : lastRef.current)?.scrollIntoView({ block: "start" });
+  }, [pending, entries.length]);
+
+  async function handleSubmit(question: string) {
+    setAsked(question);
+    const reply = await send(question, lang, mode);
+    // After an error the Space may still be waking up, so the next request keeps the cold-start text.
+    if (reply.status !== "error") setWarm(true);
+  }
+
+  const empty = entries.length === 0 && !pending;
 
   return (
-    <main style={{ padding: 16, maxWidth: 900 }}>
-      <h1>API test page</h1>
-      <p>
-        mode: {process.env.NEXT_PUBLIC_API_MODE ?? "live"}, target: {process.env.NEXT_PUBLIC_SPACE_ID ?? "(unset)"}
-      </p>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send(question, lang, mode);
-          setQuestion("");
-        }}
-      >
-        <input
-          aria-label="question"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          style={{ width: "60%" }}
-        />{" "}
-        <select aria-label="lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
-          <option value="de">de</option>
-          <option value="en">en</option>
-        </select>{" "}
-        <select aria-label="mode" value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
-          <option value="bm25">bm25</option>
-          <option value="vector">vector</option>
-          <option value="hybrid">hybrid</option>
-        </select>{" "}
-        <button type="submit" disabled={pending}>
-          {pending ? "..." : "ask"}
-        </button>{" "}
-        <button type="button" onClick={reset}>
-          new conversation
-        </button>
-      </form>
-      <p>history sent next: {history.length} round(s)</p>
-      {entries.map((e, i) => (
-        <section key={i}>
-          <h3>{e.question}</h3>
-          <pre data-testid="reply" style={{ whiteSpace: "pre-wrap" }}>
-            {JSON.stringify(e.reply, null, 2)}
-          </pre>
-        </section>
-      ))}
-    </main>
+    <div className="flex min-h-dvh flex-col">
+      <Header t={t} lang={lang} onLangChange={setLang} />
+
+      <main className="mx-auto w-full max-w-reading flex-1 px-4 pb-10 sm:px-6">
+        {empty ? (
+          <EmptyState t={t} disabled={pending} onPick={(q) => void handleSubmit(q)} />
+        ) : (
+          <div role="log" aria-live="polite" aria-relevant="additions" className="space-y-10 pt-8">
+            {entries.map((entry, i) => (
+              <ChatEntry
+                key={i}
+                id={`e${i}`}
+                t={t}
+                entry={entry}
+                ref={i === entries.length - 1 && !pending ? lastRef : undefined}
+              />
+            ))}
+            {pending && asked && (
+              <div ref={pendingRef} className="scroll-mt-4">
+                <p className="break-words rounded-panel bg-surface px-4 py-3 text-base font-semibold text-navy">
+                  {asked}
+                </p>
+                <LoadingIndicator t={t} coldStart={!warm} />
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <Composer
+        t={t}
+        mode={mode}
+        onModeChange={setMode}
+        pending={pending}
+        canReset={entries.length > 0}
+        onReset={reset}
+        onSubmit={(q) => void handleSubmit(q)}
+      />
+    </div>
   );
 }
