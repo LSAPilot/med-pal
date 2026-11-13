@@ -54,9 +54,10 @@ T = {
 
 
 def format_sources(reply: Reply) -> str:
-    """Markdown with the English original quotes. Shown inside a collapsible message."""
+    """Markdown with the English original quotes. Shown inside a collapsible message. [n] matches the markers in the answer."""
     return "\n\n".join(
-        f"**[{s['id']}]** {s['citation']}\n\n> " + s["quote"].replace("\n", "\n> ") for s in reply.sources
+        f"**[{n}]** {s['citation']} (`{s['id']}`)\n\n> " + s["quote"].replace("\n", "\n> ")
+        for n, s in enumerate(reply.sources, 1)
     )
 
 

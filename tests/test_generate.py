@@ -193,3 +193,77 @@ def test_found_as_string_false_is_not_found():
 def test_unknown_language_is_rejected():
     with pytest.raises(ValueError):
         generate.answer_question("q", lang="fr", retriever=fake_retriever(), client=FakeClient([]))
+
+
+# --- inline citation markers ---------------------------------------------------
+
+
+def test_prompt_asks_for_id_markers():
+    assert "square brackets" in generate.ANSWER_SYSTEM and "[id]" in generate.ANSWER_SYSTEM
+    p = generate.build_answer_prompt("q", fake_retriever().search("software classification", mode="bm25", k=1), [], "de")
+    assert "[c1] " in p  # the id the model has to copy is shown in front of each passage
+
+
+def answer_for(answer, ids):
+    c = FakeClient(["software classification", ans_json(ids, answer=answer)])
+    return generate.answer_question("q", [], "en", CFG, fake_retriever(), c)
+
+
+def test_markers_become_numbers_in_sources_order():
+    a = answer_for("A [c2]. B [c1]. C [c2][c1].", ["c2", "c1"])
+    assert [s.id for s in a.sources] == ["c2", "c1"]
+    assert a.text == "A [1]. B [2]. C [1][2]."
+
+
+def test_combined_marker_is_split_and_deduplicated():
+    a = answer_for("A [c1, c2] and [c1; c1].", ["c1", "c2"])
+    assert a.text == "A [1][2] and [1]."
+
+
+def test_cited_hit_missing_from_used_ids_is_appended_to_sources():
+    a = answer_for("A [c1]. B [c3].", ["c1"])
+    assert [s.id for s in a.sources] == ["c1", "c3"] and a.text == "A [1]. B [2]."
+
+
+def test_unknown_id_marker_is_removed_and_reported(caplog):
+    with caplog.at_level("WARNING", logger="regulatory_helper"):
+        a = answer_for("A [c1]. B [MDR-999-9]. C [see Art. 5].", ["c1"])
+    assert a.text == "A [1]. B. C [see Art. 5]."  # foreign brackets stay, only id-shaped ones go
+    assert a.dropped_ids == ["MDR-999-9"] and "MDR-999-9" in caplog.text
+
+
+def test_mixed_marker_keeps_the_valid_id():
+    a = answer_for("A [c1, MDR-999-9].", ["c1"])
+    assert a.text == "A [1]." and a.dropped_ids == ["MDR-999-9"]
+
+
+def test_removed_marker_does_not_merge_paragraphs():
+    a = answer_for("A [c1].\n\n[MDR-999-9] B [c1].", ["c1"])
+    assert a.text == "A [1].\n\n B [1]."
+
+
+def test_numbers_written_by_the_model_never_survive():
+    a = answer_for("A [7] [c1] and [1, 2].", ["c1"])
+    assert a.text == "A [1] and."
+
+
+def test_other_brackets_and_missing_markers_are_untouched():
+    a = answer_for("Quote: [...] and [recital of the original 2017 text].", ["c1"])
+    assert a.text == "Quote: [...] and [recital of the original 2017 text]." and [s.id for s in a.sources] == ["c1"]
+
+
+def test_every_number_resolves_to_a_source():
+    import re
+
+    a = answer_for("A [c3] B [c1] C [c2] D [c3] E [x-y-z].", ["c3", "c1", "c2"])
+    nums = {int(n) for n in re.findall(r"\[(\d+)\]", a.text)}
+    assert nums == {1, 2, 3} and nums <= set(range(1, len(a.sources) + 1))
+
+
+def test_history_is_sent_without_number_markers():
+    hist = [Turn("Is my app a device?", "Possibly [1], see Article 2 [2][3].")]
+    c = FakeClient(["software classification", ans_json(["c1"])])
+    generate.answer_question("And which class?", hist, "en", CFG, fake_retriever(), c)
+    for call in c.calls:
+        sent = call["messages"][0]["content"]
+        assert "Possibly, see Article 2." in sent and "[1]" not in sent

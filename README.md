@@ -25,6 +25,8 @@ Question          follow-up? -> rewrite into a standalone English search query (
                   -> Claude Haiku answers from the passages only and returns JSON (answer + cited chunk IDs)
                   -> ID check: every cited ID must be one of the retrieved passages, otherwise it is dropped
                   -> citations and quotes are taken from our own chunk data, never from model output
+                  -> inline markers: the model marks claims with [chunk-id]; code rewrites them to [1], [2] ... = position in the sources list
+                     (markers with unknown IDs are removed)
 ```
 The last two steps mean the model cannot invent a citation: the quoted text always comes from the stored legal text.
 
