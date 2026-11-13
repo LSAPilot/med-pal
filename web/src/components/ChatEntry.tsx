@@ -5,7 +5,7 @@ import { isAnswerStatus, type Reply, type Source } from "@/lib/api";
 import type { Entry } from "@/lib/history";
 import type { Strings } from "@/lib/i18n";
 import { AnswerText } from "./AnswerText";
-import { Disclosure } from "./Disclosure";
+import { Disclosure, disclosurePanelId } from "./Disclosure";
 import { SourceList, sourceDomId } from "./SourceList";
 import { StatusNotice } from "./StatusNotice";
 import { UnderTheHood } from "./UnderTheHood";
@@ -44,10 +44,38 @@ function describeReply(t: Strings, reply: Reply): Notice {
       return { tone: "notice", ...t.belowThreshold };
     default:
       // "error", "invalid_input", or an answer status with found=false and an unexpected reason
-      return reply.status === "ok" || reply.status === "cached" || reply.status === "example"
+      return isAnswerStatus(reply.status)
         ? { tone: "notice", ...t.belowThreshold }
         : { tone: "error", ...t.error };
   }
+}
+
+/** Upper bound for the panel's 200 ms height transition, in case no `transitionend` arrives. */
+const PANEL_SETTLE_MS = 400;
+
+/**
+ * Run `fn` once a Disclosure panel has its final height: right away if it is already open, otherwise after its
+ * opening transition (scrolling earlier would measure the collapsed panel). With reduced motion the transition
+ * is nearly instant, so `transitionend` comes at once.
+ */
+function afterPanelOpens(panel: HTMLElement | null, fn: () => void) {
+  if (!panel || !panel.inert) {
+    fn();
+    return;
+  }
+  let done = false;
+  const onEnd = (e: TransitionEvent) => {
+    if (e.target === panel) finish();
+  };
+  const timer = window.setTimeout(() => finish(), PANEL_SETTLE_MS);
+  function finish() {
+    if (done) return;
+    done = true;
+    panel?.removeEventListener("transitionend", onEnd);
+    window.clearTimeout(timer);
+    fn();
+  }
+  panel.addEventListener("transitionend", onEnd);
 }
 
 /** One question and its reply: a sourced answer, an honest "not in the sources", or a friendly status message. */
@@ -56,15 +84,22 @@ export const ChatEntry = forwardRef<HTMLElement, Props>(function ChatEntry({ t, 
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [hoodOpen, setHoodOpen] = useState(false);
 
+  const sourcesId = `${id}-sources`;
   const openSource = useCallback(
     (source: Source) => {
+      // Read before the state change: is the panel still collapsed (inert) and about to animate open?
+      const panel = document.getElementById(disclosurePanelId(sourcesId));
       setSourcesOpen(true);
-      // Wait one frame so the panel is no longer inert/collapsed, then bring the quote into view.
-      requestAnimationFrame(() => {
-        document.getElementById(sourceDomId(id, source))?.scrollIntoView({ block: "nearest" });
+      afterPanelOpens(panel, () => {
+        const target = document.getElementById(sourceDomId(id, source));
+        if (!target) return;
+        // Source to the top of the view (scroll-mt-4): "nearest" would align a source further down with the bottom
+        // edge, where the sticky composer covers it. Instant, like every other scroll on the page.
+        target.scrollIntoView({ block: "start" });
+        target.focus({ preventScroll: true });
       });
     },
-    [id],
+    [id, sourcesId],
   );
 
   const answered = isAnswerStatus(reply.status) && reply.found;
@@ -95,7 +130,7 @@ export const ChatEntry = forwardRef<HTMLElement, Props>(function ChatEntry({ t, 
           <div className="mt-5">
             {reply.sources.length > 0 && (
               <Disclosure
-                id={`${id}-sources`}
+                id={sourcesId}
                 title={t.sources}
                 badge={String(reply.sources.length)}
                 open={sourcesOpen}

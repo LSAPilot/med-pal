@@ -14,12 +14,15 @@ interface Props {
 export const citationChip =
   "inline-block min-w-[1.5em] rounded-chip bg-surface px-1.5 text-center align-baseline text-meta font-semibold leading-[1.5] text-primary";
 
-/** Sources of one answer, numbered like the `[n]` markers in the text: citation, original quote, link to EUR-Lex. */
+/**
+ * Sources of one answer, numbered like the `[n]` markers in the text: citation, original quote, link to EUR-Lex.
+ * Each item is focusable from script (`tabIndex -1`): a citation chip moves focus to its source.
+ */
 export function SourceList({ t, idPrefix, sources }: Props) {
   return (
     <ol className="space-y-6">
       {sources.map((s, i) => (
-        <li key={s.id} id={sourceDomId(idPrefix, s)} className="scroll-mt-4">
+        <li key={s.id} id={sourceDomId(idPrefix, s)} tabIndex={-1} className="scroll-mt-4 rounded-chip">
           <p className="font-semibold text-navy">
             <span className={`${citationChip} mr-2`} aria-hidden="true">
               {i + 1}

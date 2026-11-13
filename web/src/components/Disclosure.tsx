@@ -13,13 +13,18 @@ interface Props {
   children: ReactNode;
 }
 
+/** Element id of the panel of the Disclosure with this `id`. */
+export function disclosurePanelId(id: string): string {
+  return `${id}-panel`;
+}
+
 /**
  * Collapsible section: a button with `aria-expanded` and a panel that animates its height (200 ms, CSS grid
  * rows trick). A collapsed panel is `inert`, so its content cannot be focused or read.
  */
 export function Disclosure({ id, title, badge, open, onOpenChange, children }: Props) {
   const buttonId = `${id}-button`;
-  const panelId = `${id}-panel`;
+  const panelId = disclosurePanelId(id);
   return (
     <section className="border-t border-line">
       <h3 className="m-0 text-base font-semibold">
