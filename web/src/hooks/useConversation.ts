@@ -13,8 +13,12 @@ function load(): Entry[] {
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .filter((e): e is { question: string; reply: unknown } => typeof e?.question === "string")
-      .map((e) => ({ question: e.question, reply: normalizeReply(e.reply) }));
+      .filter((e): e is { question: string; reply: unknown; mode?: unknown } => typeof e?.question === "string")
+      .map((e) => ({
+        question: e.question,
+        reply: normalizeReply(e.reply),
+        mode: e.mode === "bm25" || e.mode === "vector" || e.mode === "hybrid" ? e.mode : undefined,
+      }));
   } catch {
     return []; // sessionStorage unavailable (private mode, blocked) or corrupted: start empty
   }
@@ -50,7 +54,7 @@ export function useConversation() {
       try {
         const reply = await ask(question, history, lang, mode);
         setEntries((prev) => {
-          const next = [...prev, { question, reply }];
+          const next = [...prev, { question, reply, mode }];
           save(next);
           return next;
         });
