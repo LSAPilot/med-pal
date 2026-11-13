@@ -28,7 +28,8 @@ npm run lint && npm run typecheck && npm test
 - `src/lib/mock.ts`: mock backend, loaded only in mock mode.
 - `src/hooks/useConversation.ts`: chat entries plus derived history (last 3 real answers), mirrored to `sessionStorage` when available.
 - `src/hooks/usePreferences.ts`: language (browser language by default) and search mode, kept per browser session.
-- `src/lib/i18n.ts`: all UI texts in German and English.
+- `src/lib/i18n.ts`: all UI texts in German and English. The start-view example questions must match `data/examples.json`
+  word for word (precomputed, free answers); `i18n.test.ts` checks this.
 - `src/app/page.tsx`: the single page. Holds the state and arranges the components below.
 - `src/app/globals.css`: design tokens (Tailwind v4 `@theme`: colours with measured contrast ratios, type scale, radii,
   shadows, motion) and the reduced-motion rule.
@@ -66,7 +67,7 @@ Texts follow the selected language (`de`/`en`). Every mock reply takes about 600
 | `EmptyState` | Start view: lead text, example questions, knowledge-base note |
 | `Composer` | Sticky input: search mode, "new conversation", textarea with 500-character counter, send button |
 | `ChatEntry` | One question with its reply; picks the right message for each status and reason |
-| `AnswerText` | Answer paragraphs; `[n]` markers become numbered chips that open source n (the source list is numbered the same way) |
+| `AnswerText` | Answer paragraphs; `[n]` markers become numbered chips that open the sources, scroll source n to the top and focus it (the source list is numbered the same way) |
 | `Disclosure` | Collapsible section (`aria-expanded`, 200 ms height transition, `inert` when closed) |
 | `SourceList`, `QuoteBlock` | Sources with the original quote in serif (clamped to 8 lines with "show more"), EUR-Lex link |
 | `UnderTheHood` | Search mode, rewritten query, hit table with scores and similarity bars |

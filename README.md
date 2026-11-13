@@ -40,6 +40,9 @@ The last two steps mean the model cannot invent a citation: the quoted text alwa
 - **Budget protection:** per-visitor and daily limits, an answer cache and precomputed example answers, all in memory and
   configurable via environment variables (see `.env.example`). A reached limit never calls the API.
 - **Privacy:** question texts and addresses are never logged or stored; logs contain only counters, tokens and cost.
+- **JSON API for the web frontend:** `/ask` (`gr.api` in `app.py`) takes question, history (last 3 rounds, kept by the caller),
+  language and search mode and returns the same reply as the Gradio UI. Bad input becomes an error reply, never an exception.
+  An example question typed exactly (case and spacing aside) in a new conversation in hybrid mode gets its precomputed answer for free.
 
 ## Validation results
 30 questions (22 answerable, 5 without answer in the sources, 1 follow-up session), German and English.
@@ -98,4 +101,5 @@ data/raw/                original EUR-Lex files + manifest with hashes
 data/processed/          chunks and search index (generated)
 eval/                    validation: questions, answers, blind judgements, search metrics, report (eval/README.md)
 tests/                   pytest suite (API mocked)
+web/                     static Next.js frontend for Cloudflare Workers, talks to /ask (see web/README.md)
 ```
