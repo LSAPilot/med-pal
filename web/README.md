@@ -80,3 +80,18 @@ Texts follow the selected language (`de`/`en`). Every mock reply takes about 600
 - All motion is CSS, 150 to 250 ms, and switched off by `prefers-reduced-motion`. No scroll effects.
 - Every `Reply` state has a friendly message: `found: false` is an honest refusal (amber), `error` and
   `invalid_output` are errors (red).
+
+## Security headers (`public/_headers`)
+
+Cloudflare Workers Static Assets applies `public/_headers` (copied to `out/`) in production only; `npm run dev` and a plain
+static server ignore it. It sets `nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` (as the portfolio does), a
+Content-Security-Policy and long-term caching for `/_next/static/*`.
+
+CSP: `default-src 'self'`, `font-src 'self'` (next/font is self-hosted), `style-src 'self'`, `img-src 'self' data:`,
+`connect-src` only `'self'`, the Space host `https://lsapilot-medical-app-regulatory-helper.hf.space` (`/gradio_api/queue/*`,
+SSE over fetch, no WebSocket) and `https://huggingface.co` (the Gradio client reads Space info there),
+`frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`.
+`script-src` needs `'unsafe-inline'`: the static export inlines three small scripts (Turbopack chunk list, RSC payload)
+whose content changes with every build, so fixed hashes are not possible in a static `_headers` file. Risk is low: the
+site renders no user HTML and has no third-party scripts. If the Space id changes, update `connect-src`.
+Test the CSP locally with a static server that sends the same headers (violations show up in the console).
