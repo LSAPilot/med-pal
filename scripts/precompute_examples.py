@@ -28,7 +28,7 @@ EXAMPLES = [
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    svc = Service(Config(), LimitConfig(daily_limit=10**6, visitor_limit=10**6, cache_size=0))
+    svc = Service(Config(), LimitConfig(daily_limit=10**6, visitor_limit=10**6, cache_size=0), examples=[])
     out = []
     for ex_id, de, en in EXAMPLES:
         replies = {}

@@ -42,6 +42,8 @@ MESSAGES = {
         "en": "The answer could not be generated right now. Please try again later.",
     },
 }
+# search mode the shipped examples were precomputed with (scripts/precompute_examples.py); other modes go the normal path
+EXAMPLE_MODE = "hybrid"
 LIMIT_STATUSES = ("visitor_limit", "daily_limit")
 
 
@@ -89,6 +91,7 @@ class Stats:
     answered: int = 0
     not_found: int = 0
     cache_hits: int = 0
+    example_hits: int = 0
     limited: int = 0
     errors: int = 0
     input_tokens: int = 0
@@ -104,6 +107,7 @@ class Service:
         retriever: Retriever | None = None,
         client=None,
         clock: Clock = time.time,
+        examples: list[dict] | None = None,
     ):
         self.cfg = cfg or Config()
         self.limits = limits or LimitConfig.from_env()
@@ -113,6 +117,7 @@ class Service:
         self.visitors = VisitorLimit(self.limits.visitor_limit, self.limits.visitor_window_s, clock)
         self.cache = AnswerCache(self.limits.cache_size)
         self.stats = Stats()
+        self._examples = index_examples(load_examples() if examples is None else examples)
 
     # lazy, so the app starts (and examples work) even when the key is missing
     @property
@@ -138,7 +143,7 @@ class Service:
         return Reply(text=MESSAGES[status][lang].format(**kw), status=status, found=False, reason=status)
 
     def ask(self, question: str, history: list[Turn] | None, lang: str, mode: str, visitor: str) -> Reply:
-        """Answer one question for one visitor. Order of checks: input, cache, visitor limit, daily limit, API."""
+        """Answer one question for one visitor. Order of checks: input, precomputed example, cache, visitor limit, daily limit, API."""
         lang = lang if lang in LANGS else "de"
         mode = mode if mode in MODES else self.cfg.mode
         question = (question or "").strip()
@@ -147,6 +152,14 @@ class Service:
             return self._refuse("empty", lang)
         if len(question) > self.limits.max_question_chars:
             return self._refuse("too_long", lang, n=self.limits.max_question_chars)
+
+        # a precomputed example is free: no limits, no cache, no API. Only for a fresh conversation in the mode it was computed with
+        if not history and mode == EXAMPLE_MODE:
+            ex = self._examples.get((lang, normalize_question(question)))
+            if ex is not None:
+                self.stats.example_hits += 1
+                log.info("request outcome=example_hit")
+                return example_reply(ex, lang)
 
         hist = generate.trim_history(history, self.cfg.max_history_turns)
         key = AnswerCache.make_key(question, lang, mode, hist)
@@ -208,3 +221,13 @@ def load_examples(path: Path = EXAMPLES_PATH) -> list[dict]:
 
 def example_reply(example: dict, lang: str) -> Reply:
     return Reply(**{**example["replies"][lang], "status": "example"})
+
+
+def normalize_question(q: str) -> str:
+    """Whitespace collapsed and case-folded: trivial typing differences still match an example, nothing fuzzier."""
+    return " ".join(q.split()).casefold()
+
+
+def index_examples(examples: list[dict]) -> dict[tuple[str, str], dict]:
+    """(lang, normalised question) -> example, for the exact-match shortcut in `Service.ask`."""
+    return {(lang, normalize_question(q)): ex for ex in examples for lang, q in ex["question"].items() if lang in ex["replies"]}
