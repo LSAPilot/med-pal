@@ -19,11 +19,10 @@
  * "empty" (blank question) and "too_long" (more than 500 characters) are triggered by the input itself.
  * Texts follow `lang` ("de" | "en").
  */
-import type { Hit, Lang, Reply, Source } from "./api";
+import { MAX_QUESTION_CHARS, type Hit, type Lang, type Reply, type Source } from "./api";
 
 const DELAY_MS = 600;
 const SLOW_DELAY_MS = 8000;
-const MAX_QUESTION_CHARS = 500;
 
 const SOURCES: Source[] = [
   {
@@ -81,8 +80,8 @@ const TEXT = {
     en: "The daily budget is used up. Please try again tomorrow.",
   },
   too_long: {
-    de: "Die Frage ist zu lang (maximal 500 Zeichen).",
-    en: "The question is too long (500 characters at most).",
+    de: `Die Frage ist zu lang (maximal ${MAX_QUESTION_CHARS} Zeichen).`,
+    en: `The question is too long (${MAX_QUESTION_CHARS} characters at most).`,
   },
   empty: {
     de: "Bitte stelle eine Frage.",
@@ -124,7 +123,8 @@ function answered(lang: Lang, status: "ok" | "cached" | "example"): Reply {
 export function mockReply(question: string, lang: Lang): Reply {
   const q = question.trim().toLowerCase();
   if (!q) return base({ text: TEXT.empty[lang], status: "empty", reason: "empty" });
-  if (question.length > MAX_QUESTION_CHARS) {
+  // like the backend, the length is measured after trimming
+  if (q.length > MAX_QUESTION_CHARS) {
     return base({ text: TEXT.too_long[lang], status: "too_long", reason: "too_long" });
   }
   if (q.includes("mock:visitor")) {

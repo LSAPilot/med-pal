@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
         <label
           key={o.value}
           className={cn(
-            "relative cursor-pointer select-none rounded-[4px] font-semibold transition-colors duration-150 ease-standard",
+            "relative cursor-pointer select-none rounded-chip font-semibold transition-colors duration-150 ease-standard",
             "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary",
             size === "sm" ? "px-2.5 py-1 text-meta" : "px-3 py-1.5 text-sm",
             outline

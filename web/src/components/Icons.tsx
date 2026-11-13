@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-/** Small stroke icons (16px grid). Decorative by default: callers add a text label next to them. */
+/** Small stroke icons (24-unit grid, sized 1em). Decorative by default: callers add a text label next to them. */
 function Icon({ children, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg
