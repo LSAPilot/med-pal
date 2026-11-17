@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { STATUSES, ask, normalizeReply, trimHistory, type Reply, type Turn } from "./api";
 import { turnsFromEntries } from "./history";
+import { mockReply } from "./mock";
 
 const KEYS = ["text", "status", "found", "reason", "sources", "search_query", "hits", "best_cosine"];
 
@@ -59,7 +60,9 @@ describe("turnsFromEntries", () => {
   });
 });
 
-describe("mock answer markers", () => {
+describe("ask in mock mode", () => {
+  // One round trip through `ask` (dynamic import, delay, normalisation); the status cases below call mockReply
+  // directly, so the suite does not wait 600 ms per case.
   it("every [n] in the default mock answer resolves to a source", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_MODE", "mock");
     for (const lang of ["de", "en"] as const) {
@@ -71,7 +74,7 @@ describe("mock answer markers", () => {
   });
 });
 
-describe("ask in mock mode", () => {
+describe("reply statuses", () => {
   const cases: [string, string, Partial<Reply>][] = [
     ["Wie wird Software klassifiziert?", "ok", { found: true, reason: "answered" }],
     ["mock:cached", "cached", { found: true }],
@@ -84,10 +87,9 @@ describe("ask in mock mode", () => {
     ["   ", "empty", { found: false }],
     ["mock:error", "error", { found: false }],
   ];
-  it.each(cases)("%s -> %s", async (q, status, extra) => {
-    vi.stubEnv("NEXT_PUBLIC_API_MODE", "mock");
+  it.each(cases)("%s -> %s", (q, status, extra) => {
     for (const lang of ["de", "en"] as const) {
-      const r = await ask(q, [], lang, "hybrid");
+      const r = normalizeReply(mockReply(q, lang), lang);
       expect(Object.keys(r).sort()).toEqual([...KEYS].sort());
       expect(r.status).toBe(status);
       expect(r).toMatchObject(extra);

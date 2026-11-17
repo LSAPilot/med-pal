@@ -10,6 +10,11 @@ import { Client } from "@gradio/client";
 
 export type Lang = "de" | "en";
 export type Mode = "bm25" | "vector" | "hybrid";
+
+export const MODES: readonly Mode[] = ["bm25", "vector", "hybrid"];
+export const isLang = (v: unknown): v is Lang => v === "de" || v === "en";
+export const isMode = (v: unknown): v is Mode => MODES.includes(v as Mode);
+
 export type Status =
   | "ok"
   | "cached"

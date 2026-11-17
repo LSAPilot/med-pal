@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ask, normalizeReply, type Lang, type Mode, type Reply } from "@/lib/api";
+import { ask, isMode, normalizeReply, type Lang, type Mode, type Reply } from "@/lib/api";
 import { turnsFromEntries, type Entry } from "@/lib/history";
 
 const STORAGE_KEY = "med-pal:conversation";
@@ -17,7 +17,7 @@ function load(): Entry[] {
       .map((e) => ({
         question: e.question,
         reply: normalizeReply(e.reply),
-        mode: e.mode === "bm25" || e.mode === "vector" || e.mode === "hybrid" ? e.mode : undefined,
+        mode: isMode(e.mode) ? e.mode : undefined,
       }));
   } catch {
     return []; // sessionStorage unavailable (private mode, blocked) or corrupted: start empty

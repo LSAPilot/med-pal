@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Lang, Mode } from "@/lib/api";
+import { isLang, isMode, type Lang, type Mode } from "@/lib/api";
 
 const STORAGE_KEY = "med-pal:preferences";
 
@@ -9,9 +9,6 @@ interface Preferences {
   lang: Lang;
   mode: Mode;
 }
-
-const isLang = (v: unknown): v is Lang => v === "de" || v === "en";
-const isMode = (v: unknown): v is Mode => v === "bm25" || v === "vector" || v === "hybrid";
 
 function load(): Preferences {
   const fallback: Preferences = {
