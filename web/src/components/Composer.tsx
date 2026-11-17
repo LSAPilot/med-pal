@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { MAX_QUESTION_CHARS, type Mode } from "@/lib/api";
+import { MAX_QUESTION_CHARS, MODES, type Mode } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import type { Strings } from "@/lib/i18n";
 import { ArrowUp, NewChat } from "./Icons";
@@ -65,7 +65,7 @@ export function Composer({ t, mode, onModeChange, pending, canReset, onReset, on
               legend={t.modeLabel}
               value={mode}
               onChange={onModeChange}
-              options={(["bm25", "vector", "hybrid"] as const).map((m) => ({ value: m, label: t.modes[m].label }))}
+              options={MODES.map((m) => ({ value: m, label: t.modes[m].label }))}
             />
             <span className="hidden min-w-0 truncate text-meta text-ink-muted md:inline">{t.modes[mode].hint}</span>
           </div>

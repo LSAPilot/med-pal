@@ -13,7 +13,7 @@ import gradio as gr
 
 from .generate import LANGS, Turn
 from .retrieval import DEFAULT_MODE, MODES
-from .service import Reply, Service, example_reply, load_examples
+from .service import Reply, Service, example_reply
 
 # --------------------------------------------------------------------------
 # texts (the interface follows the answer language)
@@ -159,7 +159,7 @@ def make_api_ask(service: Service):
 
 def build_demo(service: Service | None = None) -> gr.Blocks:
     service = service or Service()
-    examples = load_examples()
+    examples = service.examples
 
     with gr.Blocks(title="Regulatory Copilot", analytics_enabled=False) as demo:
         history = gr.State([])  # list[Turn], browser session only

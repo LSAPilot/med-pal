@@ -39,7 +39,6 @@
   --radius-chip: 4px; /* citation chips, tags */
   --radius-control: 6px; /* buttons, inputs, segmented controls */
   --radius-panel: 10px; /* question blocks, notices, hit table */
-  --shadow-panel: 0 1px 2px rgb(14 58 104 / 0.06), 0 6px 18px -6px rgb(14 58 104 / 0.12);
   --shadow-composer: 0 -8px 24px -12px rgb(14 58 104 / 0.18);
   --shadow-segment: 0 1px 2px rgb(14 58 104 / 0.22);
 

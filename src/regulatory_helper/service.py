@@ -117,7 +117,8 @@ class Service:
         self.visitors = VisitorLimit(self.limits.visitor_limit, self.limits.visitor_window_s, clock)
         self.cache = AnswerCache(self.limits.cache_size)
         self.stats = Stats()
-        self._examples = index_examples(load_examples() if examples is None else examples)
+        self.examples = load_examples() if examples is None else examples
+        self._examples = index_examples(self.examples)
 
     # lazy, so the app starts (and examples work) even when the key is missing
     @property

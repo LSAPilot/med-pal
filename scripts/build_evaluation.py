@@ -1,40 +1,34 @@
 """Build eval/README.md and its two charts (eval/plots/) from the data in eval/ (no API, deterministic).
 
 Usage: uv run python scripts/build_evaluation.py
-Needs eval/judgements-resolved.jsonl (scripts/judge_packet.py resolve). Hand-written examples live in eval/examples.md.
+Needs eval/judgements-resolved.jsonl (scripts/judge_packet.py resolve). Hand-written examples live in eval/examples.md,
+the hand-written threshold reasoning in THRESHOLD_NOTE below.
 """
-import json
 from collections import Counter
-from pathlib import Path
 from statistics import mean
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from eval_data import EVAL, LABEL, SYSTEMS, load  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[1]
-EVAL = ROOT / "eval"
-SYSTEMS = ["rag", "haiku-no-rag", "sonnet-no-rag"]
-LABEL = {"rag": "RAG (Haiku + search)", "haiku-no-rag": "Haiku, no RAG", "sonnet-no-rag": "Sonnet, no RAG"}
 COLOR = {"rag": "#1f77b4", "haiku-no-rag": "#aaaaaa", "sonnet-no-rag": "#555555"}
 
+THRESHOLD_NOTE = """\
+**Proposal: 0.70** (current provisional value: 0.60). Not applied to `Config`, not synced to the Space.
 
-def jl(p):
-    return [json.loads(l) for l in Path(p).read_text(encoding="utf-8").splitlines() if l.strip()]
+Reasoning:
+- With-answer questions have a best cosine of at least 0.77 (median 0.84); without-answer questions reach 0.65 to 0.76. The ranges touch (gap of only 0.014 between q29 at 0.770 and q27 at 0.755). A threshold of 0.76 would separate all 30 questions perfectly, but it is fitted to this set and leaves no margin: a slightly weaker real question would be blocked wrongly.
+- 0.70 blocks no answerable question (margin 0.07 below the weakest one) and stops clear off-topic queries (q25 DiGA at 0.654) before the LLM call. Near-miss questions (0.73 to 0.76: IEC 62304, FDA, Cyber Resilience Act, VAT) pass the threshold and are left to the model, which refused or named the gap correctly in 5/5 cases here.
+- 0.60 (current) blocked none of the five, so it only protects against nonsense; raising to 0.70 costs nothing on this set.
+- The threshold is a cheap pre-filter, not the main protection against hallucination. The model's `found` decision and the ID check did that work in this run. Re-check with more near-miss questions before moving higher.
+"""
 
-
-qs = {q["id"]: q for q in jl(EVAL / "questions.jsonl")}
-judg = {j["id"]: j["scores"] for j in jl(EVAL / "judgements-resolved.jsonl")}
-ans = {s: {r["id"]: r for r in jl(EVAL / "answers" / f"{s}.jsonl")} for s in SYSTEMS}
-sm = json.loads((EVAL / "search-metrics.json").read_text())
-has_answer = [i for i, q in qs.items() if q["type"] != "no_answer"]
-no_answer = [i for i, q in qs.items() if q["type"] == "no_answer"]
-followups = [i for i, q in qs.items() if q["type"] == "followup"]
-
-
-def sc(s, ids, key):
-    return [judg[i][s][key] for i in ids]
+data = load()
+qs, ans, sm = data.questions, data.answers, data.search
+has_answer, no_answer, followups = data.has_answer, data.no_answer, data.followups
+sc = data.scores
 
 
 def table_main():
@@ -131,7 +125,6 @@ search_tbl = "\n".join(
     + [f"| {m} | {v['hit@6']:.2f} | {v['mrr']:.3f} |" for m, v in sm["modes"].items()]
 )
 examples = (EVAL / "examples.md").read_text(encoding="utf-8") if (EVAL / "examples.md").exists() else "_(none yet)_"
-thr_text = (EVAL / "threshold-note.md").read_text(encoding="utf-8") if (EVAL / "threshold-note.md").exists() else ""
 
 doc = f"""# Evaluation: does RAG help?
 
@@ -163,13 +156,13 @@ Hit@6 and MRR on the {sm['n']} questions that have gold chunks (22 answerable + 
 
 {cost_tbl}
 
-**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: [`cost-estimate.md`](cost-estimate.md).
+**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: `uv run python scripts/run_eval.py estimate`.
 
 ## Threshold for "nothing found" (proposal, not applied)
 
 {thr_tbl}
 
-{thr_text}
+{THRESHOLD_NOTE}
 
 ## Examples
 

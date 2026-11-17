@@ -9,7 +9,7 @@ import argparse
 import logging
 
 from . import chunking, fetch, retrieval
-from .generate import Config
+from .generate import LANGS, Config
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -28,7 +28,7 @@ def main(argv: list[str] | None = None) -> None:
         if name == "ask":
             ap.add_argument("question")
         _add_search_args(ap)
-        ap.add_argument("--lang", choices=["de", "en"], default="de", help="answer language")
+        ap.add_argument("--lang", choices=LANGS, default="de", help="answer language")
         ap.add_argument("--no-rewrite", action="store_true", help="search with the raw question (ablation)")
         ap.add_argument("--threshold", type=float, default=Config.threshold, help="min. cosine of the best hit")
         ap.add_argument("--history-turns", type=int, default=Config.max_history_turns, help="rounds of history sent to the model")

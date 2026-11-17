@@ -1,7 +1,7 @@
 """Section 5b: answer runs (RAG, Haiku, Sonnet without RAG), cost estimate, search metrics.
 
 Usage (from repo root):
-  uv run python scripts/run_eval.py estimate     # writes eval/cost-estimate.md, no API call
+  uv run python scripts/run_eval.py estimate     # prints the cost estimate, no API call
   uv run python scripts/run_eval.py answers      # the three API runs, cached per question in eval/answers/*.jsonl
   uv run python scripts/run_eval.py search       # Hit@6 / MRR per mode -> eval/search-metrics.json (no LLM, needs rag.jsonl for rewrites)
 Answers already present in the jsonl files are never requested again (cache).
@@ -10,16 +10,13 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
-from eval_queries import is_hit  # noqa: E402
+from eval_data import EVAL, read_jsonl
+from eval_queries import is_hit
 
-from regulatory_helper import generate as g  # noqa: E402
-from regulatory_helper.retrieval import MODES, Retriever  # noqa: E402
+from regulatory_helper import generate as g
+from regulatory_helper.retrieval import MODES, Retriever
 
-EVAL = ROOT / "eval"
 ANS = EVAL / "answers"
 SYSTEMS = {
     "rag": ("claude-haiku-5-5", "rag.jsonl"),
@@ -39,14 +36,12 @@ Respond with the answer text only."""
 
 
 def load_questions() -> list[dict]:
-    return [json.loads(l) for l in (EVAL / "questions.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    return read_jsonl(EVAL / "questions.jsonl")
 
 
 def read_cache(name: str) -> dict[str, dict]:
     p = ANS / SYSTEMS[name][1]
-    if not p.exists():
-        return {}
-    return {r["id"]: r for r in map(json.loads, p.read_text(encoding="utf-8").splitlines() if p.read_text(encoding="utf-8").strip() else [])}
+    return {r["id"]: r for r in read_jsonl(p)} if p.exists() else {}
 
 
 def append(name: str, rec: dict) -> None:
@@ -102,7 +97,6 @@ def estimate() -> None:
         + ("approved, runs start." if total <= 1.0 else "NOT approved, no API run."),
         f"The worst case ({worst_total:.2f} USD) assumes every answer uses the full `max_tokens` and is not realistic.",
     ]
-    (EVAL / "cost-estimate.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     if total > 1.0:
         sys.exit(2)
@@ -132,13 +126,13 @@ def run_answers() -> None:
             else:
                 parts = []
                 if hist:
-                    parts.append("Conversation so far (for follow-up context only):\n" + g._history_text(hist))
+                    parts.append("Conversation so far (for follow-up context only):\n" + g.history_text(hist))
                 parts.append(f"Question: {q['question']}\nAnswer language: {g.LANG_NAME[q['lang']]}")
                 resp = client.messages.create(
                     model=model, max_tokens=cfg.answer_max_tokens, system=NO_RAG_SYSTEM,
                     messages=[{"role": "user", "content": "\n\n".join(parts)}], output_config={"effort": cfg.effort},
                 )
-                text = g._text_of(resp)
+                text = g.response_text(resp)
                 rec = {
                     "id": q["id"], "answer": text, "stop_reason": resp.stop_reason, "calls": 1,
                     "input_tokens": resp.usage.input_tokens, "output_tokens": resp.usage.output_tokens,

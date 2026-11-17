@@ -14,6 +14,15 @@ spec.loader.exec_module(bs)
 HEAD = "---\ntitle: X\nsdk: gradio\nsdk_version: 6.31.0\napp_file: app.py\n---\n"
 
 
+@pytest.fixture
+def keep_repo_requirements():
+    """A real sync also rewrites the tracked requirements.txt of this repo; a test run must not leave that change behind."""
+    path = ROOT / "requirements.txt"
+    saved = path.read_bytes()
+    yield
+    path.write_bytes(saved)
+
+
 def test_readme_header_is_kept_byte_for_byte():
     out = bs.space_readme(HEAD + "old body that gets replaced\n")
     assert out.startswith(HEAD) and "old body" not in out
@@ -78,7 +87,7 @@ def test_dry_run_into_fake_space_writes_nothing(tmp_path):
     assert sorted(p.name for p in tmp_path.iterdir()) == [".git", "README.md"]
 
 
-def test_sync_copies_only_allowed_files(tmp_path):
+def test_sync_copies_only_allowed_files(tmp_path, keep_repo_requirements):
     (tmp_path / ".git").mkdir()
     (tmp_path / "README.md").write_text(HEAD + "body\n")
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_space.py"), "--space-dir", str(tmp_path)],
