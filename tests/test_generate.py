@@ -104,8 +104,8 @@ def test_id_not_among_delivered_hits_is_invalid():
     assert generate.validate_ids(["c1", "c3"], hits) == (["c1"], ["c3"])
 
 
-def test_answer_with_only_invalid_ids_is_rejected():
-    c = FakeClient(["software classification", ans_json(["nope"])])
+def test_answer_with_only_invalid_ids_and_no_valid_marker_is_rejected():
+    c = FakeClient(["software classification", ans_json(["nope"], answer="Software can be a device.")])
     a = generate.answer_question("q", [], "en", CFG, fake_retriever(), c)
     assert not a.found and a.sources == [] and a.text == generate.NOT_FOUND["en"]
 
@@ -223,6 +223,18 @@ def test_combined_marker_is_split_and_deduplicated():
 def test_cited_hit_missing_from_used_ids_is_appended_to_sources():
     a = answer_for("A [c1]. B [c3].", ["c1"])
     assert [s.id for s in a.sources] == ["c1", "c3"] and a.text == "A [1]. B [2]."
+
+
+def test_empty_used_ids_with_valid_marker_is_shown_with_sources():
+    a = answer_for("A [c1]. B [c2].", [])
+    assert a.found and a.reason == "answered"
+    assert [s.id for s in a.sources] == ["c1", "c2"] and a.text == "A [1]. B [2]."
+
+
+def test_empty_used_ids_without_valid_marker_is_still_rejected():
+    for text in ("No markers at all.", "Only [MDR-999-9] unknown."):
+        a = answer_for(text, [])
+        assert not a.found and a.reason == "model_no_answer" and not a.sources
 
 
 def test_unknown_id_marker_is_removed_and_reported(caplog):

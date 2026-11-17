@@ -357,7 +357,8 @@ def answer_question(
         log.warning("dropped ids not among the retrieved hits: %s", invalid)
     result.dropped_ids = invalid
     answer = data["answer"].strip()
-    if data["found"] and answer and valid:
+    if data["found"] and answer:
+        # also with an empty used_ids: valid markers in the text are enough, link_citations adds their ids to the sources
         answer, valid, unknown = link_citations(answer, valid, {h.chunk.id for h in hits})
         if unknown:
             log.warning("removed inline markers for ids not among the retrieved hits: %s", unknown)
