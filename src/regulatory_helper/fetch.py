@@ -14,8 +14,9 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .chunking import RAW_DIR
+
 CELEX_BASE = "http://publications.europa.eu/resource/celex/"
-RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
 ACCEPT = "application/xhtml+xml"
 
 # key -> (CELEX id, description). The MDR is fetched twice: the consolidated

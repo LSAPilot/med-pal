@@ -39,7 +39,8 @@ class Config:
     mode: str = DEFAULT_MODE
     rewrite: bool = True
     max_history_turns: int = 3
-    # Minimum cosine of the best hit. Off-topic queries reach 0.44-0.64, on-topic ones 0.75+ (see eval/README.md).
+    # Minimum cosine of the best hit; below it no answer call is made. Answerable eval questions reached 0.77+,
+    # questions without an answer in the sources 0.65-0.76 (eval/README.md proposes 0.70, not applied yet).
     threshold: float = 0.60
     rewrite_max_tokens: int = 400
     answer_max_tokens: int = 2000
