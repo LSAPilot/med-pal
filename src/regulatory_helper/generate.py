@@ -124,9 +124,14 @@ def trim_history(history: list[Turn] | None, max_turns: int) -> list[Turn]:
 _NUMBER_MARKER = re.compile(r"\s?\[\d+\]")
 
 
-def _history_text(history: list[Turn]) -> str:
+def history_text(history: list[Turn]) -> str:
     """Earlier answers without their [n] markers: the numbers refer to that answer's sources, not to the new passages."""
     return "\n".join(f"User: {t.question}\nAssistant: {_NUMBER_MARKER.sub('', t.answer)}" for t in history)
+
+
+def response_text(resp) -> str:
+    """Concatenated text blocks of an API response (thinking and other block types are skipped)."""
+    return "".join(b.text for b in resp.content if b.type == "text").strip()
 
 
 def get_client():
@@ -152,7 +157,7 @@ def _call(client, cfg: Config, usage: Usage, system: str, user: str, max_tokens:
     usage.add(resp, cfg)
     if resp.stop_reason not in ("end_turn", "stop_sequence"):
         log.warning("model stopped early: stop_reason=%s", resp.stop_reason)
-    return "".join(b.text for b in resp.content if b.type == "text").strip()
+    return response_text(resp)
 
 
 # --------------------------------------------------------------------------
@@ -173,7 +178,7 @@ without quotes and without explanation."""
 def rewrite_query(client, question: str, history: list[Turn], cfg: Config, usage: Usage) -> str:
     parts = []
     if history:
-        parts.append("Conversation so far:\n" + _history_text(history))
+        parts.append("Conversation so far:\n" + history_text(history))
     parts.append("Latest question: " + question)
     out = _call(client, cfg, usage, REWRITE_SYSTEM, "\n\n".join(parts), cfg.rewrite_max_tokens)
     return clean_query(out) or question  # never search with an empty query
@@ -210,7 +215,7 @@ def build_answer_prompt(question: str, hits: list[Hit], history: list[Turn], lan
     passages = "\n\n".join(f"[{h.chunk.id}] {h.chunk.citation}\n{h.chunk.text}" for h in hits)
     parts = []
     if history:
-        parts.append("Conversation so far (for follow-up context only):\n" + _history_text(history))
+        parts.append("Conversation so far (for follow-up context only):\n" + history_text(history))
     parts.append("Source passages:\n" + passages)
     parts.append(f"Question: {question}\nAnswer language: {LANG_NAME.get(lang, 'English')}")
     return "\n\n".join(parts)

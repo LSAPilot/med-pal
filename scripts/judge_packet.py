@@ -6,22 +6,16 @@
 import json
 import random
 import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-EVAL = ROOT / "eval"
-SYSTEMS = ["rag", "haiku-no-rag", "sonnet-no-rag"]
+from eval_data import EVAL, ROOT, SYSTEMS, read_jsonl
+
 SEED = 5150
 
 
-def jl(p):
-    return [json.loads(l) for l in Path(p).read_text(encoding="utf-8").splitlines() if l.strip()]
-
-
 def build():
-    qs = jl(EVAL / "questions.jsonl")
-    chunks = {c["id"]: c for c in jl(ROOT / "data/processed/chunks.jsonl")}
-    ans = {s: {r["id"]: r for r in jl(EVAL / "answers" / f"{s}.jsonl")} for s in SYSTEMS}
+    qs = read_jsonl(EVAL / "questions.jsonl")
+    chunks = {c["id"]: c for c in read_jsonl(ROOT / "data/processed/chunks.jsonl")}
+    ans = {s: {r["id"]: r for r in read_jsonl(EVAL / "answers" / f"{s}.jsonl")} for s in SYSTEMS}
     rnd = random.Random(SEED)
     inputs, mapping = [], {}
     for q in qs:
@@ -47,7 +41,7 @@ def build():
 def resolve():
     mapping = json.loads((EVAL / "judge-mapping.json").read_text())
     out = []
-    for j in jl(EVAL / "judgements.jsonl"):
+    for j in read_jsonl(EVAL / "judgements.jsonl"):
         m = mapping[j["id"]]
         res = dict(j)
         res["scores"] = {m[L]: v for L, v in j["scores"].items()}
@@ -55,4 +49,5 @@ def resolve():
     (EVAL / "judgements-resolved.jsonl").write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in out) + "\n", encoding="utf-8")
 
 
-{"build": build, "resolve": resolve}[sys.argv[1]]()
+if __name__ == "__main__":
+    {"build": build, "resolve": resolve}[sys.argv[1]]()

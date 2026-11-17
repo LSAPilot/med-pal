@@ -3,21 +3,16 @@
 Usage: uv run python scripts/plot_evaluation.py
 Complements scripts/build_evaluation.py (which writes eval/README.md and the two charts embedded there).
 """
-import json
 from collections import Counter
-from pathlib import Path
 from statistics import mean
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from eval_data import EVAL, LABEL, ROOT, SYSTEMS, load  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[1]
-EVAL = ROOT / "eval"
 OUT = EVAL / "plots"
-SYSTEMS = ["rag", "haiku-no-rag", "sonnet-no-rag"]
-LABEL = {"rag": "RAG (Haiku + search)", "haiku-no-rag": "Haiku, no RAG", "sonnet-no-rag": "Sonnet, no RAG"}
 COLOR = {"rag": "#2a78d6", "haiku-no-rag": "#eb6834", "sonnet-no-rag": "#1baf7a"}  # fixed categorical order
 MODE_COLOR = {"bm25": "#2a78d6", "vector": "#eb6834", "hybrid": "#1baf7a"}
 SCORE_COLOR = {0: "#c5d9f4", 1: "#6ea4e6", 2: "#1c5cad"}  # one-hue ramp for ordinal 0-2
@@ -37,20 +32,10 @@ plt.rcParams.update({
 })
 
 
-def jl(p):
-    return [json.loads(l) for l in Path(p).read_text(encoding="utf-8").splitlines() if l.strip()]
-
-
-qs = {q["id"]: q for q in jl(EVAL / "questions.jsonl")}
-judg = {j["id"]: j["scores"] for j in jl(EVAL / "judgements-resolved.jsonl")}
-ans = {s: {r["id"]: r for r in jl(EVAL / "answers" / f"{s}.jsonl")} for s in SYSTEMS}
-sm = json.loads((EVAL / "search-metrics.json").read_text())
-has_answer = [i for i, q in qs.items() if q["type"] != "no_answer"]
-no_answer = [i for i, q in qs.items() if q["type"] == "no_answer"]
-
-
-def sc(s, ids, key):
-    return [judg[i][s][key] for i in ids]
+data = load()
+qs, ans, sm = data.questions, data.answers, data.search
+has_answer, no_answer = data.has_answer, data.no_answer
+sc = data.scores
 
 
 def save(fig, name):

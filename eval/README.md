@@ -46,7 +46,7 @@ Hit@6 and MRR on the 25 questions that have gold chunks (22 answerable + 3 follo
 | Sonnet, no RAG | claude-sonnet-5-5 | 7409 | 11719 | 0.198 | 0.0066 |
 | **Total** | | | | **0.218** | |
 
-**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: [`cost-estimate.md`](cost-estimate.md).
+**Caveat:** The Sonnet 5.5 price could not be looked up in the headless run. 3/15 USD per million tokens (input/output) was assumed as a conservative figure, so the real Sonnet cost may be lower. Haiku uses the prices from `Config`. Estimate before the run: `uv run python scripts/run_eval.py estimate`.
 
 ## Threshold for "nothing found" (proposal, not applied)
 
