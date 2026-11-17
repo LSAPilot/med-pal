@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Mode } from "@/lib/api";
 import { STRINGS } from "@/lib/i18n";
 import { useConversation } from "@/hooks/useConversation";
 import { usePreferences } from "@/hooks/usePreferences";
@@ -31,9 +32,10 @@ export default function Home() {
     (pending ? pendingRef.current : lastRef.current)?.scrollIntoView({ block: "start" });
   }, [pending, entries.length]);
 
-  async function handleSubmit(question: string) {
+  // modeOverride: example questions always go out as "hybrid", the mode their answers are precomputed with, so a click is free.
+  async function handleSubmit(question: string, modeOverride?: Mode) {
     setAsked(question);
-    const reply = await send(question, lang, mode);
+    const reply = await send(question, lang, modeOverride ?? mode);
     // After an error the Space may still be waking up, so the next request keeps the cold-start text.
     if (reply.status !== "error") setWarm(true);
   }
@@ -46,7 +48,7 @@ export default function Home() {
 
       <main className="mx-auto w-full max-w-reading flex-1 px-4 pb-10 sm:px-6">
         {empty ? (
-          <EmptyState t={t} disabled={pending} onPick={(q) => void handleSubmit(q)} />
+          <EmptyState t={t} disabled={pending} onPick={(q) => void handleSubmit(q, "hybrid")} />
         ) : (
           <div role="log" aria-live="polite" aria-relevant="additions" className="space-y-10 pt-8">
             {entries.map((entry, i) => (
