@@ -2,81 +2,37 @@
   "mdr-consolidated.xhtml": {
     "celex": "02017R0745-20260101",
     "description": "MDR, consolidated version of 2026-01-01 (no recitals)",
-    "format": "xhtml",
     "requested": "http://publications.europa.eu/resource/celex/02017R0745-20260101",
     "resolved": "http://publications.europa.eu/resource/cellar/fddb3266-f0ab-11f0-8d3c-01aa75ed71a1.0007.02/DOC_1",
+    "fetched_at": "2026-11-12T16:54:07+00:00",
     "sha256": "d3ccdd7fc67d6e69e9f9b77c7713ffbd1f5d1718667d56b149ad4b6fd5bc671e",
-    "bytes": 1630387,
-    "fetched_at": "2026-11-12T16:54:07+00:00"
-  },
-  "mdr-consolidated.formex.zip": {
-    "celex": "02017R0745-20260101",
-    "description": "MDR, consolidated version of 2026-01-01 (no recitals)",
-    "format": "formex",
-    "requested": "http://publications.europa.eu/resource/celex/02017R0745-20260101",
-    "resolved": "http://publications.europa.eu/resource/cellar/fddb3266-f0ab-11f0-8d3c-01aa75ed71a1.0007.01/zip",
-    "sha256": "497c3aedb4dd7c18ee997e57e52985694479e79feffaa2c6de9b88a781ef749b",
-    "bytes": 177153,
-    "fetched_at": "2026-11-12T16:54:08+00:00"
+    "bytes": 1630387
   },
   "mdr-original.xhtml": {
     "celex": "32017R0745",
     "description": "MDR, original OJ text of 2017 (contains recitals)",
-    "format": "xhtml",
     "requested": "http://publications.europa.eu/resource/celex/32017R0745",
     "resolved": "http://publications.europa.eu/resource/cellar/83bdc18f-315d-11e7-9412-01aa75ed71a1.0006.03/DOC_1",
+    "fetched_at": "2026-11-12T16:54:09+00:00",
     "sha256": "81790aaa50163ca27e3794c82cfa8cee875cae2dace3ad3ab9e72d9f890e94f5",
-    "bytes": 1708372,
-    "fetched_at": "2026-11-12T16:54:09+00:00"
-  },
-  "mdr-original.formex.zip": {
-    "celex": "32017R0745",
-    "description": "MDR, original OJ text of 2017 (contains recitals)",
-    "format": "formex",
-    "requested": "http://publications.europa.eu/resource/celex/32017R0745",
-    "resolved": "http://publications.europa.eu/resource/cellar/83bdc18f-315d-11e7-9412-01aa75ed71a1.0006.02/zip",
-    "sha256": "b7593f8b2d0c0da4d3c8ddb74c4a2dca97e97f8db8ec46b9758ca7dee5ecfe70",
-    "bytes": 204579,
-    "fetched_at": "2026-11-12T16:54:10+00:00"
+    "bytes": 1708372
   },
   "gdpr.xhtml": {
     "celex": "32016R0679",
     "description": "GDPR, OJ text",
-    "format": "xhtml",
     "requested": "http://publications.europa.eu/resource/celex/32016R0679",
     "resolved": "http://publications.europa.eu/resource/cellar/3e485e15-11bd-11e6-ba9a-01aa75ed71a1.0006.03/DOC_1",
+    "fetched_at": "2026-11-12T16:54:11+00:00",
     "sha256": "962539af03738bf552319ff4ce42d69e5f95a576307c4dfed7bf87e81b646b9d",
-    "bytes": 806864,
-    "fetched_at": "2026-11-12T16:54:11+00:00"
-  },
-  "gdpr.formex.zip": {
-    "celex": "32016R0679",
-    "description": "GDPR, OJ text",
-    "format": "formex",
-    "requested": "http://publications.europa.eu/resource/celex/32016R0679",
-    "resolved": "http://publications.europa.eu/resource/cellar/3e485e15-11bd-11e6-ba9a-01aa75ed71a1.0006.02/zip",
-    "sha256": "81952712f39f6bbd864ada5d10da2ae15102fdaeb1cb943411f3ec6d2ee71613",
-    "bytes": 90312,
-    "fetched_at": "2026-11-12T16:54:12+00:00"
+    "bytes": 806864
   },
   "ai-act.xhtml": {
     "celex": "32024R1689",
     "description": "AI Act, OJ text",
-    "format": "xhtml",
     "requested": "http://publications.europa.eu/resource/celex/32024R1689",
     "resolved": "http://publications.europa.eu/resource/cellar/dc8116a1-3fe6-11ef-865a-01aa75ed71a1.0006.03/DOC_1",
+    "fetched_at": "2026-11-12T16:54:12+00:00",
     "sha256": "8f0b656302f9864cc87e040c371f209a9d65ae1a6cecc25ca5eb737e872d721a",
-    "bytes": 1262391,
-    "fetched_at": "2026-11-12T16:54:12+00:00"
-  },
-  "ai-act.formex.zip": {
-    "celex": "32024R1689",
-    "description": "AI Act, OJ text",
-    "format": "formex",
-    "requested": "http://publications.europa.eu/resource/celex/32024R1689",
-    "resolved": "http://publications.europa.eu/resource/cellar/dc8116a1-3fe6-11ef-865a-01aa75ed71a1.0006.02/zip",
-    "sha256": "e8625a71f3895c72ed7244465f5222b9f25ea12d71f1a094369aef6ef456fc38",
-    "bytes": 171490,
-    "fetched_at": "2026-11-12T16:54:14+00:00"
+    "bytes": 1262391
   }
 }
