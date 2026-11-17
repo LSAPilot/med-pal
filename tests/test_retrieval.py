@@ -2,12 +2,9 @@ import numpy as np
 import pytest
 
 from regulatory_helper import retrieval
-from regulatory_helper.chunking import OUT_PATH, Chunk, read_chunks
+from regulatory_helper.chunking import OUT_PATH, read_chunks
 from regulatory_helper.store import NumpyVectorStore, VectorStore
-
-
-def make_chunk(i: str, text: str) -> Chunk:
-    return Chunk(i, "MDR", "article", "1", "Title", "1", text, "https://eur-lex.europa.eu/x", f"MDR {i}")
+from tests.fakes import fake_retriever
 
 
 def test_rrf_prefers_items_high_in_both_lists():
@@ -46,22 +43,6 @@ def test_hybrid_gives_cosine_for_bm25_only_hits():
     hits = {h.chunk.id: h for h in r.search("risk management", mode="hybrid", k=3)}
     assert hits["c2"].cosine == pytest.approx(0.0)
     assert all(h.cosine is not None for h in hits.values())
-
-
-def fake_retriever():
-    chunks = [
-        make_chunk("c1", "software classification rule class IIa"),
-        make_chunk("c2", "obligations of manufacturers risk management"),
-        make_chunk("c3", "right to erasure of personal data"),
-    ]
-    vecs = {"c1": [1, 0, 0], "c2": [0, 1, 0], "c3": [0, 0, 1]}
-    store = NumpyVectorStore([c.id for c in chunks], np.array([vecs[c.id] for c in chunks], dtype=np.float32))
-    toks = [retrieval.tokenize(retrieval.doc_text(c)) for c in chunks]
-
-    def embed(q):  # "erasure" queries point to c3, everything else to c1
-        return np.array([0, 0, 1] if "erasure" in q else [1, 0, 0], dtype=np.float32)
-
-    return retrieval.Retriever(chunks, store, [c.id for c in chunks], toks, embed_query_fn=embed)
 
 
 @pytest.mark.parametrize("mode", retrieval.MODES)

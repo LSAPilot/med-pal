@@ -12,7 +12,6 @@ def build(ids_filter: set[str] | None, out: Path) -> int:
         c = json.loads(line)
         chunks[c["id"]] = c
     qs = [json.loads(line) for line in (ROOT / "eval/questions.jsonl").open(encoding="utf-8")]
-    by_id = {q["id"]: q for q in qs}
     packet = []
     for q in qs:
         if ids_filter and q["id"] not in ids_filter:

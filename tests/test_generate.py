@@ -1,35 +1,10 @@
 """Section 3 tests. The Anthropic API is mocked: no network, no cost."""
-import json
-from types import SimpleNamespace
 
 import pytest
 
 from regulatory_helper import generate
 from regulatory_helper.generate import Config, Turn
-from tests.test_retrieval import fake_retriever
-
-
-class FakeClient:
-    """Stands in for anthropic.Anthropic. Replies are consumed in order; every request is recorded."""
-
-    def __init__(self, replies):
-        self.replies = list(replies)
-        self.calls = []
-        self.messages = self
-
-    def create(self, **kw):
-        self.calls.append(kw)
-        text = self.replies.pop(0)
-        return SimpleNamespace(
-            content=[SimpleNamespace(type="text", text=text)],
-            usage=SimpleNamespace(input_tokens=100, output_tokens=20),
-            stop_reason="end_turn",
-        )
-
-
-def ans_json(ids, found=True, answer="Software can be a device [c1]."):
-    return json.dumps({"found": found, "answer": answer, "used_ids": ids})
-
+from tests.fakes import FakeClient, ans_json, fake_retriever
 
 CFG = Config(threshold=0.5)
 

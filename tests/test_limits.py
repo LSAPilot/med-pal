@@ -1,22 +1,10 @@
 """Section 4: limits, cache and the service wrapper. The API is mocked; no network, no cost."""
 import logging
 
-import pytest
-
 from regulatory_helper.generate import Config, Turn
 from regulatory_helper.limits import AnswerCache, DailyLimit, LimitConfig, VisitorLimit
 from regulatory_helper.service import Service, example_reply
-from tests.test_generate import FakeClient, ans_json
-from tests.test_retrieval import fake_retriever
-
-
-class Clock:
-    def __init__(self, t=1_700_000_000.0):
-        self.t = t
-
-    def __call__(self):
-        return self.t
-
+from tests.fakes import Clock, FakeClient, ans_json, fake_retriever
 
 # --- building blocks --------------------------------------------------------
 

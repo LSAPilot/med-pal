@@ -9,9 +9,7 @@ from regulatory_helper.app import MAX_HISTORY_ANSWER_CHARS, build_demo, make_api
 from regulatory_helper.generate import Config
 from regulatory_helper.limits import LimitConfig
 from regulatory_helper.service import Reply, Service
-from tests.test_generate import FakeClient, ans_json
-from tests.test_limits import Clock
-from tests.test_retrieval import fake_retriever
+from tests.fakes import Clock, FakeClient, ans_json, fake_retriever
 
 REPLY_KEYS = {"text", "status", "found", "reason", "sources", "search_query", "hits", "best_cosine"}
 SOURCE_KEYS = {"id", "title", "citation", "quote", "source_url"}
